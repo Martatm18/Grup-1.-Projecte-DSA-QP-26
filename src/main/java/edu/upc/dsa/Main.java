@@ -2,6 +2,7 @@ package edu.upc.dsa;
 
 import io.swagger.jaxrs.config.BeanConfig;
 import io.swagger.jersey.listing.ApiListingResourceJSON;
+import org.apache.log4j.Logger;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.http.server.StaticHttpHandler;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
@@ -15,6 +16,8 @@ import java.net.URI;
  *
  */
 public class Main {
+    private static final Logger logger = Logger.getLogger(Main.class);
+
     // Base URI the Grizzly HTTP server will listen on
     public static final String BASE_URI = "http://localhost:8080/dsaApp/";
 
@@ -61,8 +64,8 @@ public class Main {
         server.getServerConfiguration().addHttpHandler(staticHttpHandler, "/");
 
 
-        System.out.println(String.format("Jersey app started with WADL available at "
-                + "%sapplication.wadl\nHit enter to stop it...", BASE_URI));
+        logger.info(String.format("Jersey app started with WADL available at "
+                + "%sapplication.wadl%nHit enter to stop it...", BASE_URI));
 
         System.in.read();
         server.stop();

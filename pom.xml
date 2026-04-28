@@ -43,7 +43,7 @@
             <artifactId>jersey-container-grizzly2-servlet</artifactId>
         </dependency>
 
-         <dependency>
+        <dependency>
             <groupId>org.glassfish.jersey.media</groupId>
             <artifactId>jersey-media-moxy</artifactId>
         </dependency>

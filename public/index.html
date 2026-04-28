@@ -1,3 +1,314 @@
-<h1>Hello</h1>
-<p>World</p>
-<img src="espinete.jpg">
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>DSA App</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 24px;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f7f6;
+            color: #182320;
+        }
+
+        main {
+            width: min(920px, 100%);
+            display: grid;
+            grid-template-columns: minmax(280px, 360px) 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+
+        section {
+            background: #fff;
+            border: 1px solid #dce5e1;
+            border-radius: 8px;
+            padding: 22px;
+            box-shadow: 0 16px 40px rgba(24, 35, 32, 0.08);
+        }
+
+        h1,
+        h2 {
+            margin: 0 0 16px;
+        }
+
+        .tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 18px;
+        }
+
+        button {
+            border: 0;
+            border-radius: 6px;
+            padding: 11px 14px;
+            background: #19715f;
+            color: #fff;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        button.secondary {
+            background: #e7efec;
+            color: #1c4038;
+        }
+
+        form {
+            display: grid;
+            gap: 12px;
+        }
+
+        label {
+            display: grid;
+            gap: 6px;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        input {
+            width: 100%;
+            border: 1px solid #bdcbc6;
+            border-radius: 6px;
+            padding: 11px 12px;
+            font: inherit;
+        }
+
+        .message {
+            min-height: 22px;
+            margin: 14px 0 0;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .message.error {
+            color: #a63232;
+        }
+
+        .message.ok {
+            color: #19715f;
+        }
+
+        .muted {
+            color: #63736e;
+            margin: 0;
+        }
+
+        .user-bar {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 18px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #dce5e1;
+        }
+
+        .products {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+        }
+
+        .product {
+            border: 1px solid #dce5e1;
+            border-radius: 8px;
+            padding: 14px;
+            background: #fbfdfc;
+        }
+
+        .product h3 {
+            margin: 0 0 8px;
+            font-size: 16px;
+        }
+
+        .product p {
+            margin: 0 0 12px;
+            color: #52625d;
+            font-size: 14px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 760px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<main>
+    <section>
+        <h1>DSA App</h1>
+
+        <div class="tabs">
+            <button id="showLogin" type="button">Login</button>
+            <button id="showRegister" class="secondary" type="button">Registro</button>
+        </div>
+
+        <form id="loginForm">
+            <label>Usuario <input id="loginId" autocomplete="username" required></label>
+            <label>Password <input id="loginPassword" type="password" autocomplete="current-password" required></label>
+            <button type="submit">Entrar</button>
+        </form>
+
+        <form id="registerForm" class="hidden">
+            <label>Usuario <input id="registerId" autocomplete="username" required></label>
+            <label>Nombre <input id="registerName" autocomplete="name" required></label>
+            <label>Password <input id="registerPassword" type="password" autocomplete="new-password" required></label>
+            <button type="submit">Crear cuenta</button>
+        </form>
+
+        <p id="message" class="message" aria-live="polite"></p>
+    </section>
+
+    <section>
+        <div class="user-bar">
+            <div>
+                <h2>Tienda</h2>
+                <p id="userInfo" class="muted">Inicia sesion para ver tu saldo.</p>
+            </div>
+            <button id="logoutButton" class="secondary hidden" type="button">Salir</button>
+        </div>
+        <div id="products" class="products">
+            <p class="muted">Los productos apareceran al iniciar sesion.</p>
+        </div>
+    </section>
+</main>
+
+<script>
+    const AUTH_API = "/dsaApp/auth";
+    const SHOP_API = "/dsaApp/tienda";
+
+    const loginForm = document.getElementById("loginForm");
+    const registerForm = document.getElementById("registerForm");
+    const showLogin = document.getElementById("showLogin");
+    const showRegister = document.getElementById("showRegister");
+    const message = document.getElementById("message");
+    const userInfo = document.getElementById("userInfo");
+    const products = document.getElementById("products");
+    const logoutButton = document.getElementById("logoutButton");
+
+    let currentUser = JSON.parse(localStorage.getItem("currentUser") || "null");
+
+    function setMessage(text, type) {
+        message.textContent = text;
+        message.className = type ? `message ${type}` : "message";
+    }
+
+    function setMode(mode) {
+        const loginMode = mode === "login";
+        loginForm.classList.toggle("hidden", !loginMode);
+        registerForm.classList.toggle("hidden", loginMode);
+        showLogin.classList.toggle("secondary", !loginMode);
+        showRegister.classList.toggle("secondary", loginMode);
+        setMessage("", "");
+    }
+
+    async function authRequest(path, body) {
+        const response = await fetch(`${AUTH_API}${path}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body)
+        });
+
+        if (!response.ok) {
+            throw new Error(String(response.status));
+        }
+
+        return response.json();
+    }
+
+    async function loadProducts() {
+        const response = await fetch(`${SHOP_API}/productos`);
+        if (!response.ok) {
+            products.innerHTML = '<p class="muted">No se han podido cargar los productos.</p>';
+            return;
+        }
+
+        const list = await response.json();
+        products.innerHTML = list.map(product => `
+            <article class="product">
+                <h3>${product.nombre}</h3>
+                <p>${product.descripcion}</p>
+                <strong>${product.precio} ECTS</strong>
+            </article>
+        `).join("");
+    }
+
+    async function renderSession() {
+        if (!currentUser) {
+            userInfo.textContent = "Inicia sesion para ver tu saldo.";
+            logoutButton.classList.add("hidden");
+            products.innerHTML = '<p class="muted">Los productos apareceran al iniciar sesion.</p>';
+            return;
+        }
+
+        userInfo.textContent = `${currentUser.nombre} - ${currentUser.ects} ECTS`;
+        logoutButton.classList.remove("hidden");
+        await loadProducts();
+    }
+
+    loginForm.addEventListener("submit", async event => {
+        event.preventDefault();
+        setMessage("Entrando...", "");
+
+        try {
+            currentUser = await authRequest("/login", {
+                id: document.getElementById("loginId").value,
+                password: document.getElementById("loginPassword").value
+            });
+            localStorage.setItem("currentUser", JSON.stringify(currentUser));
+            loginForm.reset();
+            setMessage("Sesion iniciada correctamente.", "ok");
+            await renderSession();
+        } catch (error) {
+            setMessage("Usuario o password incorrectos.", "error");
+        }
+    });
+
+    registerForm.addEventListener("submit", async event => {
+        event.preventDefault();
+        setMessage("Creando cuenta...", "");
+
+        try {
+            currentUser = await authRequest("/register", {
+                id: document.getElementById("registerId").value,
+                nombre: document.getElementById("registerName").value,
+                password: document.getElementById("registerPassword").value
+            });
+            localStorage.setItem("currentUser", JSON.stringify(currentUser));
+            registerForm.reset();
+            setMode("login");
+            setMessage("Cuenta creada. Ya estas dentro.", "ok");
+            await renderSession();
+        } catch (error) {
+            setMessage(error.message === "409" ? "Ese usuario ya existe." : "Revisa los datos del registro.", "error");
+        }
+    });
+
+    logoutButton.addEventListener("click", () => {
+        currentUser = null;
+        localStorage.removeItem("currentUser");
+        setMessage("Sesion cerrada.", "ok");
+        renderSession();
+    });
+
+    showLogin.addEventListener("click", () => setMode("login"));
+    showRegister.addEventListener("click", () => setMode("register"));
+    renderSession();
+</script>
+</body>
+</html>

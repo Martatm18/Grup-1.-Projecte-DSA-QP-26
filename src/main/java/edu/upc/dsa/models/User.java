@@ -1,20 +1,31 @@
 package edu.upc.dsa.models;
+
 import java.util.ArrayList;
 import java.util.List;
+import javax.xml.bind.annotation.XmlTransient;
 
 public class User
 {
     private String id;
     private String nombre;
-    private int ects; // Saldo actual de créditos ECTS
-    private List<Producto> inventario; // Lista de objetos que el usuario ha comprado
+    private String password;
+    private int ects;
+    private List<Producto> inventario;
+
+    public User() {}
 
     public User(String id, String nombre)
     {
+        this(id, nombre, "");
+    }
+
+    public User(String id, String nombre, String password)
+    {
         this.id = id;
         this.nombre = nombre;
-        this.ects = 100; //El personaje tendrá 100ECTS para empezar a comprar
-        this.inventario = new ArrayList<>(); //Empezamos con la mochila vacía
+        this.password = password;
+        this.ects = 100;
+        this.inventario = new ArrayList<>();
     }
 
     public int getEcts()
@@ -22,12 +33,16 @@ public class User
         return this.ects;
     }
 
+    public void setEcts(int ects)
+    {
+        this.ects = ects;
+    }
+
     public void addEcts(int cantidad)
     {
         this.ects += cantidad;
     }
 
-    // Resta el precio del producto al saldo del usuario
     public void subtractEcts(int cantidad)
     {
         this.ects -= cantidad;
@@ -38,7 +53,11 @@ public class User
         return inventario;
     }
 
-    // Añade un producto a la mochila del usuario
+    public void setInventario(List<Producto> inventario)
+    {
+        this.inventario = inventario;
+    }
+
     public void addObjeto(Producto p)
     {
         this.inventario.add(p);
@@ -47,5 +66,31 @@ public class User
     public String getId()
     {
         return id;
+    }
+
+    public void setId(String id)
+    {
+        this.id = id;
+    }
+
+    public String getNombre()
+    {
+        return nombre;
+    }
+
+    public void setNombre(String nombre)
+    {
+        this.nombre = nombre;
+    }
+
+    @XmlTransient
+    public String getPassword()
+    {
+        return password;
+    }
+
+    public void setPassword(String password)
+    {
+        this.password = password;
     }
 }

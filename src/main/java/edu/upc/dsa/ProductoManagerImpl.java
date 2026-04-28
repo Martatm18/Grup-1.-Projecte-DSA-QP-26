@@ -11,7 +11,7 @@ public class ProductoManagerImpl implements ProductoManager
     private ProductoManagerImpl() {
         this.tienda = new ArrayList<>();
         this.usuarios = new HashMap<>();
-        this.addUser("test", "Jugador de Pruebas");
+        this.registerUser("test", "Jugador de Pruebas", "test");
 
         // Inicializamos la tienda
         tienda.add(new Producto("1", "carga_EMP", "Desactiva drones temporalmente", 4)); //
@@ -53,6 +53,42 @@ public class ProductoManagerImpl implements ProductoManager
     public void addUser(String id, String nombre)
     {
         usuarios.put(id, new User(id, nombre));
+    }
+
+    @Override
+    public int registerUser(String id, String nombre, String password)
+    {
+        if (id == null || id.trim().isEmpty() || password == null || password.trim().isEmpty())
+        {
+            return 400;
+        }
+
+        String cleanId = id.trim();
+        if (usuarios.containsKey(cleanId))
+        {
+            return 409;
+        }
+
+        String cleanName = nombre == null || nombre.trim().isEmpty() ? cleanId : nombre.trim();
+        usuarios.put(cleanId, new User(cleanId, cleanName, password));
+        return 201;
+    }
+
+    @Override
+    public User loginUser(String id, String password)
+    {
+        if (id == null || password == null)
+        {
+            return null;
+        }
+
+        User user = usuarios.get(id.trim());
+        if (user != null && password.equals(user.getPassword()))
+        {
+            return user;
+        }
+
+        return null;
     }
 
     @Override
