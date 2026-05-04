@@ -6,7 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.appandroidprojectedsa.ui.screens.LoginScreen
 import com.example.appandroidprojectedsa.ui.screens.ShopScreen
-
+import com.example.appandroidprojectedsa.ui.screens.NewUser
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
@@ -18,6 +18,9 @@ fun AppNavigation() {
                     navController.navigate("shop") {
                         popUpTo("login") { inclusive = true }
                     }
+                },
+                onRegisterClick = {
+                    navController.navigate("NewUSER")
                 }
             )
         }
@@ -26,6 +29,15 @@ fun AppNavigation() {
                 onLogout = {
                     navController.navigate("login") {
                         popUpTo("shop") { inclusive = true }
+                    }
+                }
+            )
+        }
+        composable("NewUSER") {
+            NewUser(
+                onLoginSuccess = {
+                    navController.navigate("shop") {
+                        popUpTo("login") { inclusive = true }
                     }
                 }
             )
