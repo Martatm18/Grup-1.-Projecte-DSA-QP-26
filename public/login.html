@@ -20,7 +20,7 @@
         <header class="access-header">
             <p class="eyebrow">Sistema restringido UPC</p>
             <h1 id="loginTitle">PROTOCOLO SIGMA</h1>
-            <p class="subtitle">Identificacion requerida para continuar</p>
+            <p class="subtitle">Identificación requerida para continuar</p>
         </header>
 
         <div class="terminal-lines" aria-hidden="true">
@@ -29,24 +29,21 @@
             <span>&gt; destino: sigma.shop</span>
         </div>
 
-        <div class="auth-form">
-            <label for="Usuario">
-                Usuario
-                <input type="text" id="Usuario" placeholder="Nombre de usuario" autocomplete="username">
-            </label>
+        <!-- FORMULARIO CORREGIDO (Sin onclick, usa submit) -->
+        <form id="loginFormDedicado" class="auth-form">
+            <label for="usuario">Usuario</label>
+            <input type="text" id="usuario" name="usuario" placeholder="Nombre de usuario" autocomplete="username" required>
 
-            <label for="password">
-                Contrasena
-                <input type="password" id="password" placeholder="Clave de acceso" autocomplete="current-password">
-            </label>
+            <label for="password">Contraseña</label>
+            <input type="password" id="password" name="password" placeholder="Clave de acceso" autocomplete="current-password" required>
 
-            <button class="btn-login" onclick="handleLogin()">Entrar</button>
-        </div>
+            <button type="submit" class="btn-login">Entrar</button>
+        </form>
 
         <div id="message" class="message" aria-live="polite"></div>
 
         <p class="footer-links">
-            No tienes cuenta? <a href="index.html">Solicita registro SIGMA</a>
+            ¿No tienes cuenta? <a href="index.html">Solicita registro SIGMA</a>
         </p>
     </section>
 </main>
