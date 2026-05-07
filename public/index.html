@@ -20,7 +20,7 @@
         </div>
 
         <header class="access-header">
-            <p class="eyebrow">Terminal academica clasificada</p>
+            <p class="eyebrow">Terminal académica clasificada</p>
             <h1 id="sigmaTitle">PROTOCOLO SIGMA</h1>
             <p class="subtitle">Acceso restringido al sistema</p>
         </header>
@@ -36,43 +36,41 @@
             <button id="showRegister" class="secondary" type="button">Registro</button>
         </div>
 
+        <!-- FORMULARIO DE LOGIN -->
         <form id="loginForm" class="auth-form">
-            <label>
-                Usuario
-                <input id="loginId" autocomplete="username" required placeholder="id.alumno">
-            </label>
-            <label>
-                Password
-                <input id="loginPassword" type="password" autocomplete="current-password" required placeholder="clave de acceso">
-            </label>
+            <label for="loginId">Usuario</label>
+            <input id="loginId" name="username" type="text" autocomplete="username" required placeholder="id.alumno">
+
+            <label for="loginPassword">Contraseña</label>
+            <input id="loginPassword" name="password" type="password" autocomplete="current-password" required placeholder="clave de acceso">
+
             <button type="submit">Entrar al sistema</button>
         </form>
 
+        <!-- FORMULARIO DE REGISTRO -->
         <form id="registerForm" class="auth-form hidden">
-            <label>
-                Usuario
-                <input id="registerId" autocomplete="username" required placeholder="nuevo.agente">
-            </label>
-            <label>
-                Nombre
-                <input id="registerName" autocomplete="name" required placeholder="Nombre del jugador">
-            </label>
-            <label>
-                Password
-                <input id="registerPassword" type="password" autocomplete="new-password" required placeholder="crear clave SIGMA">
-            </label>
+            <label for="registerId">Usuario</label>
+            <input id="registerId" name="new_username" type="text" autocomplete="username" required placeholder="nuevo.agente">
+
+            <label for="registerName">Nombre</label>
+            <input id="registerName" name="nickname" type="text" autocomplete="name" required placeholder="Nombre del jugador">
+
+            <label for="registerPassword">Contraseña</label>
+            <input id="registerPassword" name="new_password" type="password" autocomplete="new-password" required placeholder="crear clave SIGMA">
+
             <button type="submit">Crear expediente</button>
         </form>
 
         <p id="message" class="message" aria-live="polite"></p>
     </section>
 
+    <!-- SECCIÓN DE TIENDA E INVENTARIO -->
     <section class="mission-panel" aria-labelledby="shopTitle">
         <div class="user-bar">
             <div>
                 <p class="eyebrow">Inventario desbloqueable</p>
                 <h2 id="shopTitle">Tienda SIGMA</h2>
-                <p id="userInfo" class="muted">Inicia sesion para ver tu saldo.</p>
+                <p id="userInfo" class="muted">Inicia sesión para ver tu saldo.</p>
             </div>
             <button id="logoutButton" class="secondary hidden" type="button">Salir</button>
         </div>
@@ -85,7 +83,7 @@
         </div>
 
         <div id="products" class="products">
-            <p class="muted">Los productos apareceran al iniciar sesion.</p>
+            <p class="muted">Los productos aparecerán al iniciar sesión.</p>
         </div>
 
         <aside class="inventory-panel" aria-labelledby="inventoryTitle">
@@ -94,7 +92,7 @@
                 <h3 id="inventoryTitle">Inventario</h3>
             </div>
             <div id="inventory" class="inventory-list">
-                <p class="muted">Aun no hay objetos sincronizados.</p>
+                <p class="muted">Aún no hay objetos sincronizados.</p>
             </div>
         </aside>
     </section>
@@ -103,6 +101,3 @@
 <script src="js/sigma-app.js"></script>
 </body>
 </html>
-
-
-
