@@ -5,6 +5,7 @@ import edu.upc.dsa.ProductoManagerImpl;
 import edu.upc.dsa.models.Producto;
 import io.swagger.annotations.Api;
 import javax.ws.rs.*;
+import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
@@ -26,7 +27,8 @@ public class ProductoServicio
     public Response getProductos()
     {
         List<Producto> lista = pm.getListaProductos();
-        return Response.status(201).entity(lista).build();
+        GenericEntity<List<Producto>> entity = new GenericEntity<List<Producto>>(lista) {};
+        return Response.ok(entity).build();
     }
 
     @POST

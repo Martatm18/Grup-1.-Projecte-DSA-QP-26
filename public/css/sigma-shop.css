@@ -1,0 +1,67 @@
+.product {
+    display: grid;
+    gap: 10px;
+}
+
+.product-code {
+    width: fit-content;
+    padding: 4px 8px;
+    border: 1px solid rgba(69, 230, 255, 0.28);
+    border-radius: 6px;
+    color: var(--cyan);
+    background: rgba(3, 9, 16, 0.68);
+    font-family: "Consolas", "Courier New", monospace;
+    font-size: 12px;
+}
+
+.product-actions {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 10px;
+    align-items: center;
+}
+
+.product-actions button {
+    min-height: 34px;
+    padding: 8px 10px;
+    font-size: 12px;
+}
+
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.52;
+    transform: none;
+}
+
+.inventory-panel {
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+}
+
+.inventory-panel h3 {
+    margin: 0 0 12px;
+    font-size: 20px;
+}
+
+.inventory-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.inventory-chip {
+    padding: 7px 10px;
+    border: 1px solid rgba(85, 255, 153, 0.32);
+    border-radius: 6px;
+    color: var(--green);
+    background: rgba(4, 42, 24, 0.28);
+    font-family: "Consolas", "Courier New", monospace;
+    font-size: 13px;
+}
+
+@media (max-width: 520px) {
+    .product-actions {
+        grid-template-columns: 1fr;
+    }
+}

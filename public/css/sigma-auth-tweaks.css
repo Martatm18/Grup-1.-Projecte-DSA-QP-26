@@ -1,0 +1,7 @@
+.access-header {
+    text-align: center;
+}
+
+h1 {
+    font-size: clamp(32px, 5.5vw, 54px);
+}
