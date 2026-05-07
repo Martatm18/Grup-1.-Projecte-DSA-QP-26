@@ -40,13 +40,19 @@ public class ProductoManagerImpl implements ProductoManager
         User u = usuarios.get(idUser);
         Producto p = tienda.stream().filter(x -> x.getId().equals(idProducto)).findFirst().orElse(null);
 
-        if (u != null && p != null && u.getEcts() >= p.getPrecio())
+        if (u == null || p == null)
+        {
+            return 404;
+        }
+
+        if (u.getEcts() >= p.getPrecio())
         {
             u.subtractEcts(p.getPrecio());
             u.addObjeto(p);
             return 201; // OK
         }
-        return 402; // No hay saldo o error
+
+        return 402; // No hay saldo
     }
 
     @Override
