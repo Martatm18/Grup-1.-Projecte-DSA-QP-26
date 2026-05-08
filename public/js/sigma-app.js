@@ -39,7 +39,7 @@ function setMode(mode) {
 
 function clearSession(text) {
     currentUser = null;
-    localStorage.removeItem("currentUser");
+    localStorage.clear();
     userInfo.textContent = "Inicia sesion para ver tu saldo.";
     logoutButton.classList.add("hidden");
     products.innerHTML = `<p class="muted">${escapeHtml(text)}</p>`;
@@ -118,8 +118,21 @@ function renderInventory() {
         return;
     }
 
-    inventory.innerHTML = items.map(item => `
-        <span class="inventory-chip">${escapeHtml(item.nombre)}</span>
+    // Agrupar productos repetidos y contar cuántas veces aparecen
+    const grouped = {};
+    items.forEach(item => {
+        const key = item.id ?? item.nombre;
+        if (grouped[key]) {
+            grouped[key].cantidad++;
+        } else {
+            grouped[key] = { ...item, cantidad: 1 };
+        }
+    });
+
+    inventory.innerHTML = Object.values(grouped).map(item => `
+        <span class="inventory-chip">
+            ${escapeHtml(item.nombre)}${item.cantidad > 1 ? ` <span class="inventory-qty">x${item.cantidad}</span>` : ""}
+        </span>
     `).join("");
 }
 
@@ -174,8 +187,9 @@ async function renderSession() {
         await loadProducts();
         renderInventory();
     } catch (error) {
-        clearSession("La sesion guardada ya no existe en el servidor.");
-        setMessage("Sesion caducada. Inicia sesion o registrate de nuevo.", "error");
+        // Servidor reiniciado o sesión inválida: limpiar sin mostrar error
+        clearSession("Los productos apareceran al iniciar sesion.");
+        setMessage("", "");
     }
 }
 
@@ -219,7 +233,7 @@ registerForm.addEventListener("submit", async event => {
 
 logoutButton.addEventListener("click", () => {
     currentUser = null;
-    localStorage.removeItem("currentUser");
+    localStorage.clear();
     setMessage("Sesion cerrada.", "ok");
     renderSession();
 });

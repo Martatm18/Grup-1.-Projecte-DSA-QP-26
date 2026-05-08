@@ -1,5 +1,7 @@
+const AUTH_API = "http://localhost:8080/dsaApp/auth";
+
 async function handleLogin() {
-    const user = document.getElementById("Usuario").value;
+    const user = document.getElementById("usuario").value;   // minúscula
     const password = document.getElementById("password").value;
     const messageDiv = document.getElementById("message");
 
@@ -9,7 +11,7 @@ async function handleLogin() {
     };
 
     try {
-        const response = await fetch("http://localhost:8080/dsaApp/auth/login", {
+        const response = await fetch(`${AUTH_API}/login`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -18,9 +20,11 @@ async function handleLogin() {
         });
 
         if (response.ok) {
+            const currentUser = await response.json();
+            localStorage.setItem("currentUser", JSON.stringify(currentUser));
             messageDiv.className = "message ok";
             messageDiv.innerText = "Login exitoso. Redirigiendo...";
-            window.location.href = "http://localhost:8080/swagger/index.html";
+            window.location.href = "index.html";
         } else {
             messageDiv.className = "message error";
             messageDiv.innerText = "Error: usuario o contrasena incorrectos.";
@@ -31,3 +35,8 @@ async function handleLogin() {
         console.error(error);
     }
 }
+
+document.getElementById("loginFormDedicado").addEventListener("submit", event => {
+    event.preventDefault();
+    handleLogin();
+});

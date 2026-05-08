@@ -42,8 +42,14 @@
             <input id="loginId" name="username" type="text" autocomplete="username" required placeholder="id.alumno">
 
             <label for="loginPassword">Contraseña</label>
-            <input id="loginPassword" name="password" type="password" autocomplete="current-password" required placeholder="clave de acceso">
-
+            <div class="password-wrapper">
+                <input id="loginPassword" name="password" type="password" autocomplete="current-password" required placeholder="clave de acceso">
+                <button type="button" class="toggle-password" aria-label="Mostrar contraseña" onclick="
+                    const i = this.previousElementSibling;
+                    i.type = i.type === 'password' ? 'text' : 'password';
+                    this.textContent = i.type === 'password' ? '👁' : '🙈';
+    ">👁</button>
+            </div>
             <button type="submit">Entrar al sistema</button>
         </form>
 
@@ -56,7 +62,14 @@
             <input id="registerName" name="nickname" type="text" autocomplete="name" required placeholder="Nombre del jugador">
 
             <label for="registerPassword">Contraseña</label>
-            <input id="registerPassword" name="new_password" type="password" autocomplete="new-password" required placeholder="crear clave SIGMA">
+            <div class="password-wrapper">
+                <input id="registerPassword" name="new_password" type="password" autocomplete="new-password" required placeholder="crear clave SIGMA">
+                <button type="button" class="toggle-password" aria-label="Mostrar contraseña" onclick="
+                    const i = this.previousElementSibling;
+                    i.type = i.type === 'password' ? 'text' : 'password';
+                    this.textContent = i.type === 'password' ? '👁' : '🙈';
+    ">👁</button>
+            </div>
 
             <button type="submit">Crear expediente</button>
         </form>
