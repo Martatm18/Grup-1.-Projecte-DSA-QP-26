@@ -69,6 +69,7 @@ public class ProductoManagerImpl implements ProductoManager
             return 400;
         }
 
+
         String cleanId = id.trim();
         if (usuarios.containsKey(cleanId))
         {

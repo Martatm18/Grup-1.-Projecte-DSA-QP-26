@@ -32,14 +32,14 @@
         </div>
 
         <div class="tabs" aria-label="Modo de acceso">
-            <button id="showLogin" type="button">Login</button>
+            <button id="showLogin" type="button">Acceso</button>
             <button id="showRegister" class="secondary" type="button">Registro</button>
         </div>
 
         <!-- FORMULARIO DE LOGIN -->
         <form id="loginForm" class="auth-form">
             <label for="loginId">Usuario</label>
-            <input id="loginId" name="username" type="text" autocomplete="username" required placeholder="id.alumno">
+            <input id="loginId" name="username" type="text" autocomplete="username" required placeholder="Nombre de usuario">
 
             <label for="loginPassword">Contraseña</label>
             <div class="password-wrapper">
@@ -47,8 +47,8 @@
                 <button type="button" class="toggle-password" aria-label="Mostrar contraseña" onclick="
                     const i = this.previousElementSibling;
                     i.type = i.type === 'password' ? 'text' : 'password';
-                    this.textContent = i.type === 'password' ? '👁' : '🙈';
-    ">👁</button>
+                    this.textContent = i.type === 'password' ? '🙈' : '👁';
+    ">🙈</button>
             </div>
             <button type="submit">Entrar al sistema</button>
         </form>
@@ -56,22 +56,32 @@
         <!-- FORMULARIO DE REGISTRO -->
         <form id="registerForm" class="auth-form hidden">
             <label for="registerId">Usuario</label>
-            <input id="registerId" name="new_username" type="text" autocomplete="username" required placeholder="nuevo.agente">
+            <input id="registerId" name="new_username" type="text" autocomplete="username" required placeholder="Nombre de usuario">
 
             <label for="registerName">Nombre</label>
             <input id="registerName" name="nickname" type="text" autocomplete="name" required placeholder="Nombre del jugador">
 
             <label for="registerPassword">Contraseña</label>
             <div class="password-wrapper">
-                <input id="registerPassword" name="new_password" type="password" autocomplete="new-password" required placeholder="crear clave SIGMA">
+                <input id="registerPassword" name="new_password" type="password" autocomplete="new-password" required placeholder="Contrasena">
                 <button type="button" class="toggle-password" aria-label="Mostrar contraseña" onclick="
                     const i = this.previousElementSibling;
                     i.type = i.type === 'password' ? 'text' : 'password';
-                    this.textContent = i.type === 'password' ? '👁' : '🙈';
-    ">👁</button>
+                    this.textContent = i.type === 'password' ? '🙈' : '👁';
+    ">🙈</button>
+
+            </div>
+            <label for="confirmRegisterPassword">Confirmar Contraseña</label>
+            <div class="password-wrapper">
+                <input id="confirmRegisterPassword" name="confirm_password" type="password" autocomplete="new-password" required placeholder="Repite tu contraseña">
+                <button type="button" class="toggle-password" aria-label="Mostrar contraseña" onclick="
+                    const i = this.previousElementSibling;
+                    i.type = i.type === 'password' ? 'text' : 'password';
+                    this.textContent = i.type === 'password' ? '🙈' : '👁';
+    ">🙈</button>
             </div>
 
-            <button type="submit">Crear expediente</button>
+            <button type="submit">Crear usuario</button>
         </form>
 
         <p id="message" class="message" aria-live="polite"></p>
