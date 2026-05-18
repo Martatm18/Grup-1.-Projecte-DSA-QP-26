@@ -55,22 +55,27 @@
 
         <!-- FORMULARIO DE REGISTRO -->
         <form id="registerForm" class="auth-form hidden">
+
             <label for="registerId">Usuario</label>
             <input id="registerId" name="new_username" type="text" autocomplete="username" required placeholder="Nombre de usuario">
+
+            <label for="registerEmail">Correo electrónico</label>
+            <input id="registerEmail" name="email" type="email" autocomplete="email" required placeholder="agente@eetac.upc.edu">
+            <span id="emailError" class="field-error hidden">Introduce un correo electrónico válido.</span>
 
             <label for="registerName">Nombre</label>
             <input id="registerName" name="nickname" type="text" autocomplete="name" required placeholder="Nombre del jugador">
 
             <label for="registerPassword">Contraseña</label>
             <div class="password-wrapper">
-                <input id="registerPassword" name="new_password" type="password" autocomplete="new-password" required placeholder="Contrasena">
+                <input id="registerPassword" name="new_password" type="password" autocomplete="new-password" required placeholder="Contraseña">
                 <button type="button" class="toggle-password" aria-label="Mostrar contraseña" onclick="
                     const i = this.previousElementSibling;
                     i.type = i.type === 'password' ? 'text' : 'password';
                     this.textContent = i.type === 'password' ? '🙈' : '👁';
     ">🙈</button>
-
             </div>
+
             <label for="confirmRegisterPassword">Confirmar Contraseña</label>
             <div class="password-wrapper">
                 <input id="confirmRegisterPassword" name="confirm_password" type="password" autocomplete="new-password" required placeholder="Repite tu contraseña">
@@ -80,6 +85,7 @@
                     this.textContent = i.type === 'password' ? '🙈' : '👁';
     ">🙈</button>
             </div>
+            <span id="confirmError" class="field-error hidden">Las contraseñas no coinciden.</span>
 
             <button type="submit">Crear usuario</button>
         </form>

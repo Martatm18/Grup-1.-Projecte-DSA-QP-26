@@ -8,6 +8,7 @@ public class User
 {
     private String id;
     private String nombre;
+    private String email;
     private String password;
     private int ects;
     private List<Producto> inventario;
@@ -81,6 +82,16 @@ public class User
     public void setNombre(String nombre)
     {
         this.nombre = nombre;
+    }
+
+    public String getEmail()
+    {
+        return email;
+    }
+
+    public void setEmail(String email)
+    {
+        this.email = email;
     }
 
     @XmlTransient

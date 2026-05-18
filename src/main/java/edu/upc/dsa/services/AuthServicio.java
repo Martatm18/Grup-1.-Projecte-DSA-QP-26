@@ -32,7 +32,7 @@ public class AuthServicio
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
 
-        int status = pm.registerUser(request.getId(), request.getNombre(), request.getPassword());
+        int status = pm.registerUser(request.getId(), request.getNombre(), request.getPassword(), request.getEmail());
         if (status == 201)
         {
             return Response.status(Response.Status.CREATED).entity(pm.getUser(request.getId().trim())).build();

@@ -11,15 +11,15 @@ public class ProductoManagerImpl implements ProductoManager
     private ProductoManagerImpl() {
         this.tienda = new ArrayList<>();
         this.usuarios = new HashMap<>();
-        this.registerUser("test", "Jugador de Pruebas", "test");
+        this.registerUser("test", "Jugador de Pruebas", "test", null);
 
         // Inicializamos la tienda
-        tienda.add(new Producto("1", "carga_EMP", "Desactiva drones temporalmente", 4)); //
-        tienda.add(new Producto("2", "usb_amarillo", "Obtiene fragmento_codigo2", 4)); //
-        tienda.add(new Producto("3", "tarjeta_temporal", "Acceso a despachos", 2)); //
-        tienda.add(new Producto("4", "botiquin", "Sube 50% de vida", 2)); //
-        tienda.add(new Producto("5", "bateria_seguridad", "Para abrir laboratorio", 3)); //
-        tienda.add(new Producto("6", "mapa_ampliado", "Ver zonas ocultas", 1)); //
+        tienda.add(new Producto("1", "carga_EMP", "Desactiva drones temporalmente", 4));
+        tienda.add(new Producto("2", "usb_amarillo", "Obtiene fragmento_codigo2", 4));
+        tienda.add(new Producto("3", "tarjeta_temporal", "Acceso a despachos", 2));
+        tienda.add(new Producto("4", "botiquin", "Sube 50% de vida", 2));
+        tienda.add(new Producto("5", "bateria_seguridad", "Para abrir laboratorio", 3));
+        tienda.add(new Producto("6", "mapa_ampliado", "Ver zonas ocultas", 1));
     }
 
     public static ProductoManager getInstance()
@@ -49,10 +49,10 @@ public class ProductoManagerImpl implements ProductoManager
         {
             u.subtractEcts(p.getPrecio());
             u.addObjeto(p);
-            return 201; // OK
+            return 201;
         }
 
-        return 402; // No hay saldo
+        return 402;
     }
 
     @Override
@@ -62,22 +62,38 @@ public class ProductoManagerImpl implements ProductoManager
     }
 
     @Override
-    public int registerUser(String id, String nombre, String password)
+    public int registerUser(String id, String nombre, String password, String email)
     {
         if (id == null || id.trim().isEmpty() || password == null || password.trim().isEmpty())
         {
             return 400;
         }
 
-
         String cleanId = id.trim();
         if (usuarios.containsKey(cleanId))
         {
-            return 409;
+            return 409; // Usuario ya existe
+        }
+
+        // Comprobar email duplicado (solo si se proporciona email)
+        if (email != null && !email.trim().isEmpty())
+        {
+            String cleanEmail = email.trim().toLowerCase();
+            boolean emailUsado = usuarios.values().stream()
+                    .anyMatch(u -> cleanEmail.equals(u.getEmail() == null ? null : u.getEmail().toLowerCase()));
+            if (emailUsado)
+            {
+                return 409; // Email ya registrado
+            }
         }
 
         String cleanName = nombre == null || nombre.trim().isEmpty() ? cleanId : nombre.trim();
-        usuarios.put(cleanId, new User(cleanId, cleanName, password));
+        User newUser = new User(cleanId, cleanName, password);
+        if (email != null && !email.trim().isEmpty())
+        {
+            newUser.setEmail(email.trim());
+        }
+        usuarios.put(cleanId, newUser);
         return 201;
     }
 

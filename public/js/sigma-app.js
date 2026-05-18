@@ -1,18 +1,27 @@
 const AUTH_API = "/dsaApp/auth";
 const SHOP_API = "/dsaApp/tienda";
 
-const loginForm = document.getElementById("loginForm");
+const loginForm    = document.getElementById("loginForm");
 const registerForm = document.getElementById("registerForm");
-const showLogin = document.getElementById("showLogin");
+const showLogin    = document.getElementById("showLogin");
 const showRegister = document.getElementById("showRegister");
-const message = document.getElementById("message");
-const userInfo = document.getElementById("userInfo");
-const products = document.getElementById("products");
-const inventory = document.getElementById("inventory");
+const message      = document.getElementById("message");
+const userInfo     = document.getElementById("userInfo");
+const products     = document.getElementById("products");
+const inventory    = document.getElementById("inventory");
 const logoutButton = document.getElementById("logoutButton");
+
+// Elementos de validación del registro
+const registerEmail           = document.getElementById("registerEmail");
+const registerPassword        = document.getElementById("registerPassword");
+const confirmRegisterPassword = document.getElementById("confirmRegisterPassword");
+const emailError              = document.getElementById("emailError");
+const confirmError            = document.getElementById("confirmError");
 
 let currentUser = JSON.parse(localStorage.getItem("currentUser") || "null");
 let shopProducts = [];
+
+// ─── Utilidades ───────────────────────────────────────────────────────────────
 
 function escapeHtml(value) {
     return String(value ?? "")
@@ -46,6 +55,38 @@ function clearSession(text) {
     renderInventory();
 }
 
+// ─── Validaciones ─────────────────────────────────────────────────────────────
+
+function isValidEmail(v) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+}
+
+function pwMissing(password) {
+    const missing = [];
+    if (password.length < 8)                                             missing.push("mínimo 8 caracteres");
+    if (!/[A-Z]/.test(password))                                         missing.push("una mayúscula");
+    if (!/[0-9]/.test(password))                                         missing.push("un número");
+    if (!/[!@#$%^&*()\-_=+\[\]{};:'"\\|,.<>/?]/.test(password))        missing.push("un carácter especial");
+    return missing;
+}
+
+// Email: error en tiempo real
+registerEmail.addEventListener("input", () => {
+    const v = registerEmail.value;
+    emailError.classList.toggle("hidden", !v || isValidEmail(v));
+});
+registerEmail.addEventListener("blur", () => {
+    emailError.classList.toggle("hidden", isValidEmail(registerEmail.value));
+});
+
+// Confirmar contraseña: error en tiempo real
+confirmRegisterPassword.addEventListener("input", () => {
+    const match = registerPassword.value === confirmRegisterPassword.value;
+    confirmError.classList.toggle("hidden", match || !confirmRegisterPassword.value);
+});
+
+// ─── API ──────────────────────────────────────────────────────────────────────
+
 async function authRequest(path, body) {
     const response = await fetch(`${AUTH_API}${path}`, {
         method: "POST",
@@ -69,6 +110,8 @@ async function refreshCurrentUser() {
     currentUser = await response.json();
     localStorage.setItem("currentUser", JSON.stringify(currentUser));
 }
+
+// ─── Tienda ───────────────────────────────────────────────────────────────────
 
 async function loadProducts() {
     const response = await fetch(`${SHOP_API}/productos`);
@@ -118,7 +161,6 @@ function renderInventory() {
         return;
     }
 
-    // Agrupar productos repetidos y contar cuántas veces aparecen
     const grouped = {};
     items.forEach(item => {
         const key = item.id ?? item.nombre;
@@ -187,11 +229,12 @@ async function renderSession() {
         await loadProducts();
         renderInventory();
     } catch (error) {
-        // Servidor reiniciado o sesión inválida: limpiar sin mostrar error
         clearSession("Los productos apareceran al iniciar sesion.");
         setMessage("", "");
     }
 }
+
+// ─── Formularios ──────────────────────────────────────────────────────────────
 
 loginForm.addEventListener("submit", async event => {
     event.preventDefault();
@@ -199,7 +242,7 @@ loginForm.addEventListener("submit", async event => {
 
     try {
         currentUser = await authRequest("/login", {
-            id: document.getElementById("loginId").value,
+            id:       document.getElementById("loginId").value,
             password: document.getElementById("loginPassword").value
         });
         localStorage.setItem("currentUser", JSON.stringify(currentUser));
@@ -213,13 +256,40 @@ loginForm.addEventListener("submit", async event => {
 
 registerForm.addEventListener("submit", async event => {
     event.preventDefault();
+
+    const email    = registerEmail.value.trim();
+    const password = registerPassword.value;
+    const confirm  = confirmRegisterPassword.value;
+
+    // 1. Validar email
+    if (!isValidEmail(email)) {
+        emailError.classList.remove("hidden");
+        setMessage("Introduce un correo electronico valido.", "error");
+        return;
+    }
+
+    // 2. Validar robustez de contraseña — mostrar en el cuadro inferior qué falta
+    const missing = pwMissing(password);
+    if (missing.length > 0) {
+        setMessage("Contraseña insegura. Falta: " + missing.join(", ") + ".", "error");
+        return;
+    }
+
+    // 3. Validar que las contraseñas coincidan
+    if (password !== confirm) {
+        confirmError.classList.remove("hidden");
+        setMessage("Las contraseñas no coinciden.", "error");
+        return;
+    }
+
     setMessage("Creando cuenta...", "");
 
     try {
         currentUser = await authRequest("/register", {
-            id: document.getElementById("registerId").value,
-            nombre: document.getElementById("registerName").value,
-            password: document.getElementById("registerPassword").value
+            id:       document.getElementById("registerId").value,
+            nombre:   document.getElementById("registerName").value,
+            email:    email,
+            password: password
         });
         localStorage.setItem("currentUser", JSON.stringify(currentUser));
         registerForm.reset();
@@ -227,7 +297,11 @@ registerForm.addEventListener("submit", async event => {
         setMessage("Cuenta creada. Ya estas dentro.", "ok");
         await renderSession();
     } catch (error) {
-        setMessage(error.message === "409" ? "Ese usuario ya existe." : "Revisa los datos del registro.", "error");
+        if (error.message === "409") {
+            setMessage("Ese usuario o correo electronico ya esta registrado.", "error");
+        } else {
+            setMessage("Revisa los datos del registro.", "error");
+        }
     }
 });
 
