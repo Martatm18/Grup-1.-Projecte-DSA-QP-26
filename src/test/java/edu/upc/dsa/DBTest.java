@@ -7,7 +7,7 @@ public class DBTest {
     public static void main(String[] args) {
         ProductoManager pm = ProductoManagerImpl.getInstance();
 
-        String username = "hectorgrau" + System.currentTimeMillis();
+        String username = "hectorgrau";
         String nombre = "Héctor";
         String password = "1234";
         String email = username + "@gmail.com";

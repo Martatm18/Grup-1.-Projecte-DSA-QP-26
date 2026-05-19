@@ -1,7 +1,11 @@
 package edu.upc.dsa.db;
 
 import edu.upc.dsa.models.User;
+import edu.upc.dsa.db.orm.FactorySession;
+import edu.upc.dsa.db.orm.Session;
 
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -10,62 +14,62 @@ import java.sql.SQLException;
 public class UserDAO {
     //resgistrar usuari
     public int registerUser(String username, String nombre, String password, String email){
-        String sql = "INSERT INTO users (username, name, password, email, ects) VALUES (?, ?, ?, ?, ?)";
-        try (Connection conn = DBUtils.getConnection();
-             PreparedStatement pstm = conn.prepareStatement(sql)) {
-            pstm.setString(1, username);
-            pstm.setString(2, nombre);
-            pstm.setString(3, password);
-            pstm.setString(4, email);
-            pstm.setInt(5,100);
-            
-            pstm.executeUpdate();
+        Session session = null;
+
+        try {
+            session = FactorySession.openSession();
+
+            User user = new User(username, nombre, password);
+            user.setEmail(email);
+            user.setEcts(100);
+
+            session.save(user);
+
             return 201;
-        } catch (SQLException e) {
+        } catch (Exception e) {
             return 409;
+        } finally {
+            if (session != null) {
+                session.close();
+            }
         }
     }
 //login usuari
     public User loginUser(String username, String password) {
-        String sql = "SELECT * FROM users WHERE username = ? AND password = ?";
-        
-        try (Connection conn = DBUtils.getConnection();
-             PreparedStatement pstm = conn.prepareStatement(sql)) {
-            
-            pstm.setString(1, username);
-            pstm.setString(2, password);
-            
-            ResultSet rs = pstm.executeQuery();
-            
-            if (rs.next()) {
-                
-                return buildUser(rs);
-                
+        Session session = null;
+
+            try {
+                session = FactorySession.openSession();
+
+                LinkedHashMap<String, Object> params = new LinkedHashMap<>();
+                params.put("id", username);
+                params.put("password", password);
+
+                List<Object> result = session.findAll(User.class, params);
+
+                if (result.isEmpty()) {
+                    return null;
+                }
+
+                return (User) result.get(0);
+
+            } finally {
+                if (session != null) {
+                    session.close();
+                }
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
     }
     public User getUser(String username) {
-        String sql = "SELECT * FROM users WHERE username=?";
+        Session session = null;
 
-        try (Connection conn = DBUtils.getConnection();
-             PreparedStatement pstm = conn.prepareStatement(sql)) {
-
-            pstm.setString(1, username);
-
-            ResultSet rs = pstm.executeQuery();
-
-            if (rs.next()) {
-                return buildUser(rs);
+        try {
+            session = FactorySession.openSession();
+            return (User) session.get(User.class, username);
+        } finally {
+            if (session != null) {
+                session.close();
             }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
-
-        return null;
     }
 
     private User buildUser(ResultSet rs) throws SQLException {
