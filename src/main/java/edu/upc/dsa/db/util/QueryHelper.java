@@ -1,4 +1,4 @@
-package edu.upc.dsa.db.orm.util;
+package edu.upc.dsa.db.util;
 
 import edu.upc.dsa.models.User;
 

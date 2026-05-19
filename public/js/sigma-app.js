@@ -17,6 +17,7 @@ const registerPassword        = document.getElementById("registerPassword");
 const confirmRegisterPassword = document.getElementById("confirmRegisterPassword");
 const emailError              = document.getElementById("emailError");
 const confirmError            = document.getElementById("confirmError");
+const passwordHelp            = document.getElementById("passwordHelp");
 
 let currentUser = JSON.parse(localStorage.getItem("currentUser") || "null");
 let shopProducts = [];
@@ -63,14 +64,44 @@ function isValidEmail(v) {
 
 function pwMissing(password) {
     const missing = [];
-    if (password.length < 8)                                             missing.push("mínimo 8 caracteres");
-    if (!/[A-Z]/.test(password))                                         missing.push("una mayúscula");
-    if (!/[0-9]/.test(password))                                         missing.push("un número");
-    if (!/[!@#$%^&*()\-_=+\[\]{};:'"\\|,.<>/?]/.test(password))        missing.push("un carácter especial");
+    if (password.length < 8)                                              missing.push("mínimo 8 caracteres");
+    if (!/[A-Z]/.test(password))                                          missing.push("una mayúscula");
+    if (!/[0-9]/.test(password))                                          missing.push("un número");
+    if (!/[!@#$%^&*()\-_=+\[\]{};:'"\\|,.<>/?]/.test(password))         missing.push("un carácter especial");
     return missing;
 }
 
-// Email: error en tiempo real
+function pwMissing(password) {
+    const missing = [];
+    if (password.length < 8)                                      missing.push("minimo 8 caracteres");
+    if (!/[A-Z]/.test(password))                                  missing.push("una mayuscula");
+    if (!/[0-9]/.test(password))                                  missing.push("un numero");
+    if (!/[!@#$%^&*()\-_=+\[\]{};:'"\\|,.<>/?]/.test(password)) missing.push("un caracter especial");
+    return missing;
+}
+
+function backendPasswordMissing(detail) {
+    const labels = {
+        MIN_LENGTH: "minimo 8 caracteres",
+        UPPERCASE: "una mayuscula",
+        NUMBER: "un numero",
+        SPECIAL: "un caracter especial"
+    };
+
+    return String(detail || "")
+        .replace("WEAK_PASSWORD:", "")
+        .split(",")
+        .map(rule => labels[rule.trim()])
+        .filter(Boolean);
+}
+
+function updatePasswordHelp() {
+    const missing = pwMissing(registerPassword.value);
+    passwordHelp.classList.toggle("hidden", !registerPassword.value || missing.length === 0);
+    passwordHelp.textContent = missing.length === 0 ? "" : "Falta: " + missing.join(", ") + ".";
+}
+
+// Email registro: error en tiempo real
 registerEmail.addEventListener("input", () => {
     const v = registerEmail.value;
     emailError.classList.toggle("hidden", !v || isValidEmail(v));
@@ -85,6 +116,12 @@ confirmRegisterPassword.addEventListener("input", () => {
     confirmError.classList.toggle("hidden", match || !confirmRegisterPassword.value);
 });
 
+registerPassword.addEventListener("input", () => {
+    updatePasswordHelp();
+    const match = registerPassword.value === confirmRegisterPassword.value;
+    confirmError.classList.toggle("hidden", match || !confirmRegisterPassword.value);
+});
+
 // ─── API ──────────────────────────────────────────────────────────────────────
 
 async function authRequest(path, body) {
@@ -95,7 +132,10 @@ async function authRequest(path, body) {
     });
 
     if (!response.ok) {
-        throw new Error(String(response.status));
+        const detail = await response.text();
+        const error = new Error(String(response.status));
+        error.detail = detail;
+        throw error;
     }
 
     return response.json();
@@ -240,24 +280,28 @@ loginForm.addEventListener("submit", async event => {
     event.preventDefault();
     setMessage("Entrando...", "");
 
+    const loginId  = document.getElementById("loginId").value.trim();
+    const password = document.getElementById("loginPassword").value;
+
     try {
-        currentUser = await authRequest("/login", {
-            id:       document.getElementById("loginId").value,
-            password: document.getElementById("loginPassword").value
-        });
+        // Si lo que escribió tiene formato email, usar el endpoint login-by-email
+        currentUser = await authRequest("/login", isValidEmail(loginId)
+            ? { email: loginId.toLowerCase(), password: password }
+            : { id: loginId, password: password });
+
         localStorage.setItem("currentUser", JSON.stringify(currentUser));
         loginForm.reset();
         setMessage("Sesion iniciada correctamente.", "ok");
         await renderSession();
     } catch (error) {
-        setMessage("Usuario o password incorrectos.", "error");
+        setMessage("Usuario, correo o contrasena incorrectos.", "error");
     }
 });
 
 registerForm.addEventListener("submit", async event => {
     event.preventDefault();
 
-    const email    = registerEmail.value.trim();
+    const email    = registerEmail.value.trim().toLowerCase();
     const password = registerPassword.value;
     const confirm  = confirmRegisterPassword.value;
 
@@ -268,17 +312,18 @@ registerForm.addEventListener("submit", async event => {
         return;
     }
 
-    // 2. Validar robustez de contraseña — mostrar en el cuadro inferior qué falta
+    // 2. Validar robustez de contraseña
     const missing = pwMissing(password);
     if (missing.length > 0) {
-        setMessage("Contraseña insegura. Falta: " + missing.join(", ") + ".", "error");
+        updatePasswordHelp();
+        setMessage("Contrasena insegura. Falta: " + missing.join(", ") + ".", "error");
         return;
     }
 
     // 3. Validar que las contraseñas coincidan
     if (password !== confirm) {
         confirmError.classList.remove("hidden");
-        setMessage("Las contraseñas no coinciden.", "error");
+        setMessage("Las contrasenas no coinciden.", "error");
         return;
     }
 
@@ -286,19 +331,33 @@ registerForm.addEventListener("submit", async event => {
 
     try {
         currentUser = await authRequest("/register", {
-            id:       document.getElementById("registerId").value,
-            nombre:   document.getElementById("registerName").value,
+            id:       document.getElementById("registerId").value.trim(),
+            nombre:   document.getElementById("registerName").value.trim(),
             email:    email,
             password: password
         });
         localStorage.setItem("currentUser", JSON.stringify(currentUser));
         registerForm.reset();
+        updatePasswordHelp();
         setMode("login");
         setMessage("Cuenta creada. Ya estas dentro.", "ok");
         await renderSession();
     } catch (error) {
         if (error.message === "409") {
-            setMessage("Ese usuario o correo electronico ya esta registrado.", "error");
+            if (error.detail.includes("EMAIL_EXISTS")) {
+                setMessage("Ese correo electronico ya esta registrado.", "error");
+            } else {
+                setMessage("Ese nombre de usuario ya existe.", "error");
+            }
+        } else if (error.message === "400" && error.detail.includes("WEAK_PASSWORD")) {
+            const missingFromServer = backendPasswordMissing(error.detail);
+            setMessage("Contrasena insegura. Falta: " + missingFromServer.join(", ") + ".", "error");
+        } else if (error.message === "400" && error.detail.includes("INVALID_EMAIL")) {
+            setMessage("Introduce un correo electronico valido.", "error");
+        } else if (error.message === "400") {
+            setMessage("Rellena usuario, correo y contrasena.", "error");
+        } else if (error.message === "500") {
+            setMessage("No se ha podido crear la cuenta por un error del servidor.", "error");
         } else {
             setMessage("Revisa los datos del registro.", "error");
         }

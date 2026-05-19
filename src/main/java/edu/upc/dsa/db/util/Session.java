@@ -1,4 +1,4 @@
-package edu.upc.dsa.db.orm;
+package edu.upc.dsa.db.util;
 
 import java.util.LinkedHashMap;
 import java.util.List;

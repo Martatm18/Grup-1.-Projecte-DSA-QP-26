@@ -1,6 +1,5 @@
-package edu.upc.dsa.db.orm;
+package edu.upc.dsa.db.util;
 
-import edu.upc.dsa.db.orm.util.QueryHelper;
 import edu.upc.dsa.models.User;
 
 import java.sql.*;

@@ -74,7 +74,7 @@ public class ProductoManagerImpl implements ProductoManager
 
         String cleanId = id.trim();
         String cleanName = nombre == null || nombre.trim().isEmpty() ? cleanId : nombre.trim();
-        String cleanEmail = email == null || email.trim().isEmpty() ? null : email.trim();
+        String cleanEmail = email == null || email.trim().isEmpty() ? null : email.trim().toLowerCase();
 
         return userDAO.registerUser(cleanId, cleanName, password, cleanEmail);
     }
