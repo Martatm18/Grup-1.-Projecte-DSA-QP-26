@@ -10,7 +10,7 @@ public class MainTest {
     private static final Logger logger = Logger.getLogger(MainTest.class);
 
     public static void main(String[] args) {
-        ProductoManager pm = ProductoManagerImpl.getInstance();
+       /* ProductoManager pm = ProductoManagerImpl.getInstance();
 
         String userId = "estudiante_sigma";
         String password = "sigma123";
@@ -53,6 +53,6 @@ public class MainTest {
             }
         } else {
             logger.error("Resultado: ERROR (" + res + ")");
-        }
+        }*/
     }
 }

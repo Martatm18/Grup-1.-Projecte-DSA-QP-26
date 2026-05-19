@@ -1,16 +1,19 @@
 package edu.upc.dsa;
 import edu.upc.dsa.models.*;
 import java.util.*;
+import edu.upc.dsa.db.UserDAO;
 
 public class ProductoManagerImpl implements ProductoManager
 {
     private static ProductoManager instance;
     private List<Producto> tienda;
     private Map<String, User> usuarios;
+    private UserDAO userDAO;
 
     private ProductoManagerImpl() {
         this.tienda = new ArrayList<>();
         this.usuarios = new HashMap<>();
+        this.userDAO = new UserDAO();
         this.registerUser("test", "Jugador de Pruebas", "test", null);
 
         // Inicializamos la tienda
@@ -70,31 +73,10 @@ public class ProductoManagerImpl implements ProductoManager
         }
 
         String cleanId = id.trim();
-        if (usuarios.containsKey(cleanId))
-        {
-            return 409; // Usuario ya existe
-        }
-
-        // Comprobar email duplicado (solo si se proporciona email)
-        if (email != null && !email.trim().isEmpty())
-        {
-            String cleanEmail = email.trim().toLowerCase();
-            boolean emailUsado = usuarios.values().stream()
-                    .anyMatch(u -> cleanEmail.equals(u.getEmail() == null ? null : u.getEmail().toLowerCase()));
-            if (emailUsado)
-            {
-                return 409; // Email ya registrado
-            }
-        }
-
         String cleanName = nombre == null || nombre.trim().isEmpty() ? cleanId : nombre.trim();
-        User newUser = new User(cleanId, cleanName, password);
-        if (email != null && !email.trim().isEmpty())
-        {
-            newUser.setEmail(email.trim());
-        }
-        usuarios.put(cleanId, newUser);
-        return 201;
+        String cleanEmail = email == null || email.trim().isEmpty() ? null : email.trim();
+
+        return userDAO.registerUser(cleanId, cleanName, password, cleanEmail);
     }
 
     @Override
@@ -105,18 +87,17 @@ public class ProductoManagerImpl implements ProductoManager
             return null;
         }
 
-        User user = usuarios.get(id.trim());
-        if (user != null && password.equals(user.getPassword()))
-        {
-            return user;
-        }
-
-        return null;
+        return userDAO.loginUser(id.trim(), password);
     }
 
     @Override
     public User getUser(String idUser) {
-        return this.usuarios.get(idUser);
+        if (idUser == null || idUser.trim().isEmpty())
+        {
+            return null;
+        }
+
+        return userDAO.getUser(idUser.trim());
     }
 }
 
