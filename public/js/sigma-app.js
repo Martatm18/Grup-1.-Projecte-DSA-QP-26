@@ -284,8 +284,44 @@ function renderInventory() {
     inventory.innerHTML = Object.values(grouped).map(item => `
         <span class="inventory-chip">
             ${escapeHtml(item.nombre)}${item.cantidad > 1 ? ` <span class="inventory-qty">x${item.cantidad}</span>` : ""}
+            <button class="inventory-delete" type="button" data-inventory-product-id="${escapeHtml(item.id)}" aria-label="Eliminar ${escapeHtml(item.nombre)}">
+                Eliminar
+            </button>
         </span>
     `).join("");
+}
+
+async function deleteInventoryProduct(productId) {
+    if (!currentUser) {
+        setMessage("Inicia sesion para eliminar objetos.", "error");
+        return;
+    }
+
+    setMessage("Eliminando objeto del inventario...", "");
+
+    try {
+        const response = await fetch(`${SHOP_API}/inventario/${encodeURIComponent(productId)}/${encodeURIComponent(currentUser.id)}`, {
+            method: "DELETE"
+        });
+
+        if (!response.ok) {
+            throw new Error(String(response.status));
+        }
+
+        await refreshCurrentUser();
+        userInfo.textContent = `${currentUser.nombre} - ${currentUser.ects} ECTS`;
+        renderProducts();
+        renderInventory();
+        setMessage("Objeto eliminado del inventario.", "ok");
+    } catch (error) {
+        if (error.message === "404") {
+            await renderSession();
+            setMessage("Ese objeto ya no esta en tu inventario.", "error");
+            return;
+        }
+
+        setMessage("No se ha podido eliminar el objeto.", "error");
+    }
 }
 
 async function buyProduct(productId) {
@@ -454,6 +490,15 @@ products.addEventListener("click", event => {
     }
 
     buyProduct(button.dataset.productId);
+});
+
+inventory?.addEventListener("click", event => {
+    const button = event.target.closest("button[data-inventory-product-id]");
+    if (!button) {
+        return;
+    }
+
+    deleteInventoryProduct(button.dataset.inventoryProductId);
 });
 
 registerAvatarPicker?.addEventListener("click", event => {

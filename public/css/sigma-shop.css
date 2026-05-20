@@ -51,6 +51,9 @@ button:disabled {
 }
 
 .inventory-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
     padding: 7px 10px;
     border: 1px solid rgba(85, 255, 153, 0.32);
     border-radius: 6px;
@@ -58,6 +61,21 @@ button:disabled {
     background: rgba(4, 42, 24, 0.28);
     font-family: "Consolas", "Courier New", monospace;
     font-size: 13px;
+}
+
+.inventory-delete {
+    min-height: 24px;
+    padding: 3px 7px;
+    border-color: rgba(255, 77, 102, 0.42);
+    background: rgba(55, 5, 15, 0.42);
+    color: #ffb6c0;
+    box-shadow: none;
+    font-size: 10px;
+}
+
+.inventory-delete:hover {
+    border-color: var(--red);
+    box-shadow: 0 0 16px rgba(255, 77, 102, 0.2);
 }
 
 @media (max-width: 520px) {

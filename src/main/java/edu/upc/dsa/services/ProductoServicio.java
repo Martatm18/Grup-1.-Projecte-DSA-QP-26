@@ -38,4 +38,12 @@ public class ProductoServicio
         int res = pm.comprarProducto(idProd, idUser);
         return Response.status(res).build();
     }
+
+    @DELETE
+    @Path("/inventario/{idProd}/{idUser}")
+    public Response eliminarInventario(@PathParam("idProd") String idProd, @PathParam("idUser") String idUser)
+    {
+        int res = pm.eliminarProductoInventario(idProd, idUser);
+        return Response.status(res).build();
+    }
 }
