@@ -96,4 +96,50 @@ public class ProductoDAO {
 
         return inventario;
     }
+
+    public int eliminarProductoInventario(String username, Integer productId) {
+    String selectSql = "SELECT quantity FROM inventory WHERE username=? AND product_id=?";
+    String updateSql = "UPDATE inventory SET quantity=quantity-1 WHERE username=? AND product_id=?";
+    String deleteSql = "DELETE FROM inventory WHERE username=? AND product_id=?";
+
+    try (Connection conn = DBUtils.getConnection()) {
+
+        int quantity = 0;
+
+        try (PreparedStatement pstm = conn.prepareStatement(selectSql)) {
+            pstm.setString(1, username);
+            pstm.setInt(2, productId);
+
+            try (ResultSet rs = pstm.executeQuery()) {
+                if (rs.next()) {
+                    quantity = rs.getInt("quantity");
+                }
+            }
+        }
+
+        if (quantity == 0) {
+            return 404;
+        }
+
+        if (quantity == 1) {
+            try (PreparedStatement pstm = conn.prepareStatement(deleteSql)) {
+                pstm.setString(1, username);
+                pstm.setInt(2, productId);
+                pstm.executeUpdate();
+            }
+        } else {
+            try (PreparedStatement pstm = conn.prepareStatement(updateSql)) {
+                pstm.setString(1, username);
+                pstm.setInt(2, productId);
+                pstm.executeUpdate();
+            }
+        }
+
+        return 204;
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+        return 500;
+    }
+}
 }
