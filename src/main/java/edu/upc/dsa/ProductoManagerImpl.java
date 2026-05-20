@@ -113,5 +113,28 @@ public class ProductoManagerImpl implements ProductoManager
             user.setInventario(productoDAO.getInventario(user.getId()));
         }
     }
+
+    @Override
+    public int eliminarProductoInventario(String idProducto, String idUser) {
+        if (idProducto == null || idUser == null) {
+            return 400;
+        }
+
+        Integer productId;
+        try {
+            productId = Integer.parseInt(idProducto);
+        } catch (NumberFormatException e) {
+            return 400;
+        }
+
+        User user = userDAO.getUser(idUser.trim());
+        Producto producto = productoDAO.getProducto(productId);
+
+        if (user == null || producto == null) {
+            return 404;
+        }
+
+        return productoDAO.eliminarProductoInventario(user.getId(), productId);
+    }
 }
 

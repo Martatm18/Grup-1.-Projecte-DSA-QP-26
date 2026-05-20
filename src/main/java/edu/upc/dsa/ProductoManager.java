@@ -22,4 +22,7 @@ public interface ProductoManager
 
     // Para buscar un usuario por su ID
     public User getUser(String idUser);
+
+    // Para eliminar un producto del inventario de un usuario
+    public int eliminarProductoInventario(String idProducto, String idUser);
 }

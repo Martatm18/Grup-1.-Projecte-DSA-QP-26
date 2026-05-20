@@ -38,6 +38,7 @@ public class SessionImpl implements Session {
             pstm.setString(3, user.getPassword());
             pstm.setString(4, user.getEmail());
             pstm.setInt(5, user.getEcts());
+            pstm.setString(6, user.getAvatar());
 
             pstm.executeUpdate();
         } catch (SQLException e) {
@@ -127,6 +128,7 @@ public class SessionImpl implements Session {
 
         user.setEmail(rs.getString("email"));
         user.setEcts(rs.getInt("ects"));
+        user.setAvatar(rs.getString("avatar"));
 
         return user;
     }

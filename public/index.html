@@ -66,6 +66,19 @@
             <label for="registerName">Nombre</label>
             <input id="registerName" name="nickname" type="text" autocomplete="name" required placeholder="Nombre del jugador">
 
+            <input id="registerAvatar" name="avatar" type="hidden" value="avatar_1">
+            <div class="avatar-section" aria-label="Elegir avatar">
+                <p class="eyebrow">Avatar de agente</p>
+                <div id="registerAvatarPicker" class="avatar-picker">
+                    <button class="avatar-option selected" type="button" data-avatar="avatar_1"><img src="img/avatars/avatar_1.png" alt="Avatar 1"></button>
+                    <button class="avatar-option" type="button" data-avatar="avatar_2"><img src="img/avatars/avatar_2.png" alt="Avatar 2"></button>
+                    <button class="avatar-option" type="button" data-avatar="avatar_3"><img src="img/avatars/avatar_3.png" alt="Avatar 3"></button>
+                    <button class="avatar-option" type="button" data-avatar="avatar_4"><img src="img/avatars/avatar_4.png" alt="Avatar 4"></button>
+                    <button class="avatar-option" type="button" data-avatar="avatar_5"><img src="img/avatars/avatar_5.png" alt="Avatar 5"></button>
+                    <button class="avatar-option" type="button" data-avatar="avatar_6"><img src="img/avatars/avatar_6.png" alt="Avatar 6"></button>
+                </div>
+            </div>
+
             <label for="registerPassword">Contraseña</label>
             <div class="password-wrapper">
                 <input id="registerPassword" name="new_password" type="password" autocomplete="new-password" required placeholder="Contraseña">
@@ -97,10 +110,24 @@
     <!-- SECCIÓN DE TIENDA E INVENTARIO -->
     <section class="mission-panel" aria-labelledby="shopTitle">
         <div class="user-bar">
-            <div>
+            <div class="user-summary">
+                <img id="currentAvatarImage" class="current-avatar hidden" src="img/avatars/avatar_1.png" alt="Avatar actual">
+                <div>
                 <p class="eyebrow">Inventario desbloqueable</p>
                 <h2 id="shopTitle">Tienda SIGMA</h2>
                 <p id="userInfo" class="muted">Inicia sesión para ver tu saldo.</p>
+                </div>
+            </div>
+            <div id="sessionAvatarPanel" class="session-avatar-panel hidden" aria-label="Cambiar avatar">
+                <p class="eyebrow">Avatar</p>
+                <div id="sessionAvatarPicker" class="avatar-picker compact">
+                    <button class="avatar-option" type="button" data-avatar="avatar_1"><img src="img/avatars/avatar_1.png" alt="Avatar 1"></button>
+                    <button class="avatar-option" type="button" data-avatar="avatar_2"><img src="img/avatars/avatar_2.png" alt="Avatar 2"></button>
+                    <button class="avatar-option" type="button" data-avatar="avatar_3"><img src="img/avatars/avatar_3.png" alt="Avatar 3"></button>
+                    <button class="avatar-option" type="button" data-avatar="avatar_4"><img src="img/avatars/avatar_4.png" alt="Avatar 4"></button>
+                    <button class="avatar-option" type="button" data-avatar="avatar_5"><img src="img/avatars/avatar_5.png" alt="Avatar 5"></button>
+                    <button class="avatar-option" type="button" data-avatar="avatar_6"><img src="img/avatars/avatar_6.png" alt="Avatar 6"></button>
+                </div>
             </div>
             <button id="logoutButton" class="secondary hidden" type="button">Salir</button>
         </div>

@@ -10,6 +10,11 @@ const userInfo     = document.getElementById("userInfo");
 const products     = document.getElementById("products");
 const inventory    = document.getElementById("inventory");
 const logoutButton = document.getElementById("logoutButton");
+const registerAvatar = document.getElementById("registerAvatar");
+const registerAvatarPicker = document.getElementById("registerAvatarPicker");
+const sessionAvatarPanel = document.getElementById("sessionAvatarPanel");
+const sessionAvatarPicker = document.getElementById("sessionAvatarPicker");
+const currentAvatarImage = document.getElementById("currentAvatarImage");
 
 // Elementos de validación del registro
 const registerEmail           = document.getElementById("registerEmail");
@@ -21,6 +26,7 @@ const passwordHelp            = document.getElementById("passwordHelp");
 
 let currentUser = JSON.parse(localStorage.getItem("currentUser") || "null");
 let shopProducts = [];
+const AVATARS = ["avatar_1", "avatar_2", "avatar_3", "avatar_4", "avatar_5", "avatar_6"];
 
 // ─── Utilidades ───────────────────────────────────────────────────────────────
 
@@ -52,8 +58,63 @@ function clearSession(text) {
     localStorage.clear();
     userInfo.textContent = "Inicia sesion para ver tu saldo.";
     logoutButton.classList.add("hidden");
+    renderAvatarState();
     products.innerHTML = `<p class="muted">${escapeHtml(text)}</p>`;
     renderInventory();
+}
+
+function cleanAvatar(avatar) {
+    return AVATARS.includes(avatar) ? avatar : "avatar_1";
+}
+
+function avatarPath(avatar) {
+    return `img/avatars/${cleanAvatar(avatar)}.png`;
+}
+
+function markSelectedAvatar(container, avatar) {
+    if (!container) {
+        return;
+    }
+
+    const selectedAvatar = cleanAvatar(avatar);
+    container.querySelectorAll(".avatar-option").forEach(button => {
+        button.classList.toggle("selected", button.dataset.avatar === selectedAvatar);
+    });
+}
+
+function renderAvatarState() {
+    const avatar = cleanAvatar(currentUser?.avatar);
+    markSelectedAvatar(registerAvatarPicker, registerAvatar?.value || "avatar_1");
+    markSelectedAvatar(sessionAvatarPicker, avatar);
+
+    if (!currentUser) {
+        sessionAvatarPanel?.classList.add("hidden");
+        currentAvatarImage?.classList.add("hidden");
+        return;
+    }
+
+    sessionAvatarPanel?.classList.remove("hidden");
+    currentAvatarImage.src = avatarPath(avatar);
+    currentAvatarImage.classList.remove("hidden");
+}
+
+async function updateAvatar(avatar) {
+    if (!currentUser) {
+        return;
+    }
+
+    const selectedAvatar = cleanAvatar(avatar);
+    const response = await fetch(`${AUTH_API}/usuarios/${encodeURIComponent(currentUser.id)}/avatar/${encodeURIComponent(selectedAvatar)}`, {
+        method: "PUT"
+    });
+
+    if (!response.ok) {
+        throw new Error(String(response.status));
+    }
+
+    currentUser = await response.json();
+    localStorage.setItem("currentUser", JSON.stringify(currentUser));
+    renderAvatarState();
 }
 
 // ─── Validaciones ─────────────────────────────────────────────────────────────
@@ -239,6 +300,7 @@ async function buyProduct(productId) {
 
         await refreshCurrentUser();
         userInfo.textContent = `${currentUser.nombre} - ${currentUser.ects} ECTS`;
+        renderAvatarState();
         renderProducts();
         renderInventory();
         setMessage("Objeto adquirido. Inventario sincronizado.", "ok");
@@ -257,6 +319,7 @@ async function renderSession() {
     if (!currentUser) {
         userInfo.textContent = "Inicia sesion para ver tu saldo.";
         logoutButton.classList.add("hidden");
+        renderAvatarState();
         products.innerHTML = '<p class="muted">Los productos apareceran al iniciar sesion.</p>';
         renderInventory();
         return;
@@ -265,6 +328,7 @@ async function renderSession() {
     try {
         await refreshCurrentUser();
         userInfo.textContent = `${currentUser.nombre} - ${currentUser.ects} ECTS`;
+        renderAvatarState();
         logoutButton.classList.remove("hidden");
         await loadProducts();
         renderInventory();
@@ -334,10 +398,13 @@ registerForm.addEventListener("submit", async event => {
             id:       document.getElementById("registerId").value.trim(),
             nombre:   document.getElementById("registerName").value.trim(),
             email:    email,
-            password: password
+            password: password,
+            avatar:   registerAvatar.value
         });
         localStorage.setItem("currentUser", JSON.stringify(currentUser));
         registerForm.reset();
+        registerAvatar.value = "avatar_1";
+        renderAvatarState();
         updatePasswordHelp();
         setMode("login");
         setMessage("Cuenta creada. Ya estas dentro.", "ok");
@@ -378,6 +445,30 @@ products.addEventListener("click", event => {
     }
 
     buyProduct(button.dataset.productId);
+});
+
+registerAvatarPicker?.addEventListener("click", event => {
+    const button = event.target.closest(".avatar-option");
+    if (!button) {
+        return;
+    }
+
+    registerAvatar.value = cleanAvatar(button.dataset.avatar);
+    markSelectedAvatar(registerAvatarPicker, registerAvatar.value);
+});
+
+sessionAvatarPicker?.addEventListener("click", async event => {
+    const button = event.target.closest(".avatar-option");
+    if (!button) {
+        return;
+    }
+
+    try {
+        await updateAvatar(button.dataset.avatar);
+        setMessage("Avatar actualizado.", "ok");
+    } catch (error) {
+        setMessage("No se ha podido actualizar el avatar.", "error");
+    }
 });
 
 showLogin.addEventListener("click", () => setMode("login"));

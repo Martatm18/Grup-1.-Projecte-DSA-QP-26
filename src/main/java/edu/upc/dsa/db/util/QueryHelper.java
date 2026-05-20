@@ -49,7 +49,7 @@ public class QueryHelper {
     }
 
     public static String createInsertUser() {
-        return "INSERT INTO users (username, name, password, email, ects) VALUES (?, ?, ?, ?, ?)";
+        return "INSERT INTO users (username, name, password, email, ects, avatar) VALUES (?, ?, ?, ?, ?, ?)";
     }
 
     public static String createUpdateUserEcts() {

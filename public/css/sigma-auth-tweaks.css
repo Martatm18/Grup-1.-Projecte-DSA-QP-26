@@ -5,3 +5,70 @@
 h1 {
     font-size: clamp(32px, 5.5vw, 54px);
 }
+
+.user-summary {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.current-avatar {
+    width: 62px;
+    height: 62px;
+    flex: 0 0 auto;
+    border: 1px solid rgba(69, 230, 255, 0.46);
+    border-radius: 8px;
+    object-fit: cover;
+    background: rgba(3, 9, 16, 0.78);
+    box-shadow: 0 0 18px rgba(69, 230, 255, 0.16);
+}
+
+.avatar-section {
+    display: grid;
+    gap: 8px;
+}
+
+.avatar-picker {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.avatar-picker.compact {
+    grid-template-columns: repeat(3, 38px);
+}
+
+.avatar-option {
+    display: grid;
+    place-items: center;
+    min-width: 0;
+    padding: 3px;
+    border: 1px solid rgba(69, 230, 255, 0.26);
+    border-radius: 6px;
+    background: rgba(3, 9, 16, 0.68);
+    box-shadow: none;
+}
+
+.avatar-option:hover,
+.avatar-option.selected {
+    border-color: var(--green);
+    box-shadow: 0 0 18px rgba(85, 255, 153, 0.18);
+    transform: none;
+}
+
+.avatar-option img {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 4px;
+    object-fit: cover;
+}
+
+.session-avatar-panel {
+    display: grid;
+    gap: 7px;
+}
+
+.session-avatar-panel.hidden,
+.current-avatar.hidden {
+    display: none;
+}

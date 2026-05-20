@@ -6,6 +6,8 @@ import edu.upc.dsa.db.util.Session;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -36,6 +38,7 @@ public class UserDAO {
             User user = new User(username, nombre, password);
             user.setEmail(email == null ? null : email.trim().toLowerCase());
             user.setEcts(100);
+            user.setAvatar("avatar_1");
 
             session.save(user);
 
@@ -116,6 +119,23 @@ public class UserDAO {
         }
     }
 
+    public int updateAvatar(String username, String avatar) {
+        String sql = "UPDATE users SET avatar=? WHERE username=?";
+
+        try (Connection conn = DBUtils.getConnection();
+             PreparedStatement pstm = conn.prepareStatement(sql)) {
+
+            pstm.setString(1, avatar);
+            pstm.setString(2, username);
+
+            int updatedRows = pstm.executeUpdate();
+            return updatedRows == 0 ? 404 : 204;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return 500;
+        }
+    }
+
     private User buildUser(ResultSet rs) throws SQLException {
         User user = new User(
                 rs.getString("username"),
@@ -125,6 +145,7 @@ public class UserDAO {
 
         user.setEmail(rs.getString("email"));
         user.setEcts(rs.getInt("ects"));
+        user.setAvatar(rs.getString("avatar"));
 
         return user;
     }

@@ -6,6 +6,7 @@ public class AuthRequest
     private String nombre;
     private String email;
     private String password;
+    private String avatar;
 
     public AuthRequest() {}
 
@@ -47,5 +48,15 @@ public class AuthRequest
     public void setPassword(String password)
     {
         this.password = password;
+    }
+
+    public String getAvatar()
+    {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar)
+    {
+        this.avatar = avatar;
     }
 }

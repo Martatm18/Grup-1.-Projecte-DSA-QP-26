@@ -10,6 +10,7 @@ public class User
     private String nombre;
     private String email;
     private String password;
+    private String avatar;
     private int ects;
     private List<Producto> inventario;
 
@@ -25,6 +26,7 @@ public class User
         this.id = id;
         this.nombre = nombre;
         this.password = password;
+        this.avatar = "avatar_1";
         this.ects = 100;
         this.inventario = new ArrayList<>();
     }
@@ -92,6 +94,16 @@ public class User
     public void setEmail(String email)
     {
         this.email = email;
+    }
+
+    public String getAvatar()
+    {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar)
+    {
+        this.avatar = avatar;
     }
 
     @XmlTransient

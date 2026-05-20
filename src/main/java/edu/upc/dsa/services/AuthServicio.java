@@ -53,6 +53,11 @@ public class AuthServicio
         int status = pm.registerUser(request.getId(), request.getNombre(), request.getPassword(), request.getEmail());
         if (status == 201)
         {
+            String avatar = cleanAvatar(request.getAvatar());
+            if (avatar != null)
+            {
+                userDAO.updateAvatar(request.getId().trim(), avatar);
+            }
             return Response.status(Response.Status.CREATED).entity(pm.getUser(request.getId().trim())).build();
         }
         if (status == UserDAO.USERNAME_EXISTS)
@@ -156,5 +161,41 @@ public class AuthServicio
         }
 
         return Response.ok(user).build();
+    }
+
+    @PUT
+    @Path("/usuarios/{idUser}/avatar/{avatar}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response updateAvatar(@PathParam("idUser") String idUser, @PathParam("avatar") String avatar)
+    {
+        if (isBlank(idUser))
+        {
+            return badRequest("MISSING_USER");
+        }
+
+        String cleanAvatar = cleanAvatar(avatar);
+        if (cleanAvatar == null)
+        {
+            return badRequest("INVALID_AVATAR");
+        }
+
+        int status = userDAO.updateAvatar(idUser.trim(), cleanAvatar);
+        if (status != 204)
+        {
+            return Response.status(status).build();
+        }
+
+        return Response.ok(pm.getUser(idUser.trim())).build();
+    }
+
+    private String cleanAvatar(String avatar)
+    {
+        if (avatar == null)
+        {
+            return null;
+        }
+
+        String value = avatar.trim();
+        return value.matches("avatar_[1-6]") ? value : null;
     }
 }
