@@ -1,6 +1,7 @@
 package edu.upc.dsa.db;
 
 import edu.upc.dsa.models.User;
+import edu.upc.dsa.models.UserGameState;
 import edu.upc.dsa.db.util.FactorySession;
 import edu.upc.dsa.db.util.Session;
 
@@ -41,6 +42,7 @@ public class UserDAO {
             user.setAvatar("avatar_1");
 
             session.save(user);
+            session.save(new UserGameState(username));
 
             return 201;
         } catch (Exception e) {

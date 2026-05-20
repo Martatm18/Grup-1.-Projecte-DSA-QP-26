@@ -7,6 +7,7 @@ const showLogin    = document.getElementById("showLogin");
 const showRegister = document.getElementById("showRegister");
 const message      = document.getElementById("message");
 const userInfo     = document.getElementById("userInfo");
+const gameStateInfo = document.getElementById("gameStateInfo");
 const products     = document.getElementById("products");
 const inventory    = document.getElementById("inventory");
 const logoutButton = document.getElementById("logoutButton");
@@ -60,6 +61,7 @@ function clearSession(text) {
     userInfo.textContent = "Inicia sesion para ver tu saldo.";
     logoutButton.classList.add("hidden");
     renderAvatarState();
+    renderGameState();
     products.innerHTML = `<p class="muted">${escapeHtml(text)}</p>`;
     renderInventory();
 }
@@ -101,6 +103,40 @@ function renderAvatarState() {
     sessionAvatarPanel?.classList.remove("hidden");
     currentAvatarImage.src = avatarPath(avatar);
     currentAvatarImage.classList.remove("hidden");
+}
+
+function renderGameState() {
+    if (!gameStateInfo) {
+        return;
+    }
+
+    const state = currentUser?.gameState;
+    if (!currentUser || !state) {
+        gameStateInfo.classList.add("hidden");
+        gameStateInfo.innerHTML = "";
+        return;
+    }
+
+    const health = state.health ?? 100;
+    const maxHealth = state.maxHealth ?? 100;
+    const mission = state.currentMissionTitle || `Mision ${state.currentMissionId || 1}`;
+    const objective = state.currentObjectiveTitle || `Objetivo ${state.currentObjectiveId || 1}`;
+    const healthPercent = Math.max(0, Math.min(100, (health / Math.max(maxHealth, 1)) * 100));
+
+    gameStateInfo.classList.remove("hidden");
+    gameStateInfo.innerHTML = `
+        <div class="health-row">
+            <span>Vida</span>
+            <strong>${escapeHtml(health)} / ${escapeHtml(maxHealth)}</strong>
+        </div>
+        <div class="health-track" aria-hidden="true">
+            <span style="width: ${healthPercent}%"></span>
+        </div>
+        <div class="mission-row">
+            <span>${escapeHtml(mission)}</span>
+            <small>${escapeHtml(objective)}</small>
+        </div>
+    `;
 }
 
 async function updateAvatar(avatar) {
@@ -346,6 +382,7 @@ async function buyProduct(productId) {
         await refreshCurrentUser();
         userInfo.textContent = `${currentUser.nombre} - ${currentUser.ects} ECTS`;
         renderAvatarState();
+        renderGameState();
         renderProducts();
         renderInventory();
         setMessage("Objeto adquirido. Inventario sincronizado.", "ok");
@@ -365,6 +402,7 @@ async function renderSession() {
         userInfo.textContent = "Inicia sesion para ver tu saldo.";
         logoutButton.classList.add("hidden");
         renderAvatarState();
+        renderGameState();
         products.innerHTML = '<p class="muted">Los productos apareceran al iniciar sesion.</p>';
         renderInventory();
         return;
@@ -374,6 +412,7 @@ async function renderSession() {
         await refreshCurrentUser();
         userInfo.textContent = `${currentUser.nombre} - ${currentUser.ects} ECTS`;
         renderAvatarState();
+        renderGameState();
         logoutButton.classList.remove("hidden");
         await loadProducts();
         renderInventory();

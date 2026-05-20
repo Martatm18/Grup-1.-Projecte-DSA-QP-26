@@ -14,8 +14,8 @@ h1 {
 }
 
 .current-avatar {
-    width: 278px;
-    height: 371px;
+    width: 120px;
+    height: 160.14px;
     flex: 0 0 auto;
     border: 1px solid rgba(69, 230, 255, 0.46);
     border-radius: 8px;
@@ -83,6 +83,58 @@ h1 {
 
 .session-avatar-panel.hidden,
 .current-avatar.hidden,
-.avatar-picker.hidden {
+.avatar-picker.hidden,
+.game-state-info.hidden {
     display: none;
+}
+
+.game-state-info {
+    display: grid;
+    gap: 7px;
+    margin-top: 10px;
+    max-width: 340px;
+}
+
+.health-row,
+.mission-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    font-family: "Consolas", "Courier New", monospace;
+}
+
+.health-row span,
+.mission-row small {
+    color: var(--muted);
+}
+
+.health-row strong {
+    color: var(--green);
+}
+
+.health-track {
+    height: 8px;
+    overflow: hidden;
+    border: 1px solid rgba(85, 255, 153, 0.28);
+    border-radius: 999px;
+    background: rgba(3, 9, 16, 0.72);
+}
+
+.health-track span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--green), var(--cyan));
+}
+
+.mission-row {
+    flex-direction: column;
+    align-items: flex-start;
+    padding-top: 2px;
+}
+
+.mission-row span {
+    color: var(--text);
+    font-weight: 800;
 }

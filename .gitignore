@@ -29,6 +29,31 @@
 .idea/**/libraries
 target
 
+# Database dumps
+*.sql
+*.dump
+*.bak
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Compiled classes and logs
+*.class
+*.log
+logs/
+
+# Local config / secrets
+.env
+*.env
+application-local.properties
+db.properties
+
+# Temporary files
+*.tmp
+*.temp
+~$*
+
 # Gradle and Maven with auto-import
 # When using Gradle or Maven with auto-import, you should exclude module files,
 # since they will be recreated, and may cause churn.  Uncomment if using

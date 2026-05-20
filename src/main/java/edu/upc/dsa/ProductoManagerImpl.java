@@ -1,6 +1,7 @@
 package edu.upc.dsa;
 import edu.upc.dsa.models.*;
 import java.util.*;
+import edu.upc.dsa.db.GameStateDAO;
 import edu.upc.dsa.db.ProductoDAO;
 import edu.upc.dsa.db.UserDAO;
 
@@ -8,10 +9,12 @@ public class ProductoManagerImpl implements ProductoManager
 {
     private static ProductoManager instance;
     private ProductoDAO productoDAO;
+    private GameStateDAO gameStateDAO;
     private UserDAO userDAO;
 
     private ProductoManagerImpl() {
         this.productoDAO = new ProductoDAO();
+        this.gameStateDAO = new GameStateDAO();
         this.userDAO = new UserDAO();
     }
 
@@ -90,7 +93,7 @@ public class ProductoManagerImpl implements ProductoManager
         }
 
         User user = userDAO.loginUser(id.trim(), password);
-        loadInventory(user);
+        loadUserData(user);
 
         return user;
     }
@@ -103,14 +106,15 @@ public class ProductoManagerImpl implements ProductoManager
         }
 
         User user = userDAO.getUser(idUser.trim());
-        loadInventory(user);
+        loadUserData(user);
 
         return user;
     }
 
-    private void loadInventory(User user) {
+    private void loadUserData(User user) {
         if (user != null) {
             user.setInventario(productoDAO.getInventario(user.getId()));
+            user.setGameState(gameStateDAO.getOrCreateGameState(user.getId()));
         }
     }
 
@@ -137,4 +141,3 @@ public class ProductoManagerImpl implements ProductoManager
         return productoDAO.eliminarProductoInventario(user.getId(), productId);
     }
 }
-
