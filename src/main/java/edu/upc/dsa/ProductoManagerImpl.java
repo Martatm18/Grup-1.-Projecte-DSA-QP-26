@@ -89,7 +89,10 @@ public class ProductoManagerImpl implements ProductoManager
             return null;
         }
 
-        return userDAO.loginUser(id.trim(), password);
+        User user = userDAO.loginUser(id.trim(), password);
+        loadInventory(user);
+
+        return user;
     }
 
     @Override
@@ -99,7 +102,16 @@ public class ProductoManagerImpl implements ProductoManager
             return null;
         }
 
-        return userDAO.getUser(idUser.trim());
+        User user = userDAO.getUser(idUser.trim());
+        loadInventory(user);
+
+        return user;
+    }
+
+    private void loadInventory(User user) {
+        if (user != null) {
+            user.setInventario(productoDAO.getInventario(user.getId()));
+        }
     }
 }
 

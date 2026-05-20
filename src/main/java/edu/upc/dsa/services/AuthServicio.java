@@ -93,6 +93,7 @@ public class AuthServicio
             return Response.status(Response.Status.UNAUTHORIZED).build();
         }
 
+        user = pm.getUser(user.getId());
         return Response.ok(user).build();
     }
 
@@ -114,6 +115,7 @@ public class AuthServicio
             return Response.status(Response.Status.UNAUTHORIZED).build();
         }
 
+        user = pm.getUser(user.getId());
         return Response.ok(user).build();
     }
 
