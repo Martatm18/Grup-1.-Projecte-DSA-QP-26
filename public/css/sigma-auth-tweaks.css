@@ -9,12 +9,13 @@ h1 {
 .user-summary {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 18px;
+    min-width: 0;
 }
 
 .current-avatar {
-    width: 62px;
-    height: 62px;
+    width: 96px;
+    height: 96px;
     flex: 0 0 auto;
     border: 1px solid rgba(69, 230, 255, 0.46);
     border-radius: 8px;
@@ -30,12 +31,13 @@ h1 {
 
 .avatar-picker {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 8px;
 }
 
-.avatar-picker.compact {
-    grid-template-columns: repeat(3, 38px);
+.avatar-picker.profile-picker {
+    grid-template-columns: repeat(4, 64px);
+    justify-content: end;
 }
 
 .avatar-option {
@@ -65,10 +67,22 @@ h1 {
 
 .session-avatar-panel {
     display: grid;
-    gap: 7px;
+    gap: 10px;
+    justify-items: end;
+}
+
+.avatar-change-button {
+    padding: 9px 12px;
+    font-size: 12px;
+}
+
+.profile-picker .avatar-option {
+    width: 64px;
+    height: 64px;
 }
 
 .session-avatar-panel.hidden,
-.current-avatar.hidden {
+.current-avatar.hidden,
+.avatar-picker.hidden {
     display: none;
 }

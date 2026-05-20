@@ -15,6 +15,7 @@ const registerAvatarPicker = document.getElementById("registerAvatarPicker");
 const sessionAvatarPanel = document.getElementById("sessionAvatarPanel");
 const sessionAvatarPicker = document.getElementById("sessionAvatarPicker");
 const currentAvatarImage = document.getElementById("currentAvatarImage");
+const changeAvatarButton = document.getElementById("changeAvatarButton");
 
 // Elementos de validación del registro
 const registerEmail           = document.getElementById("registerEmail");
@@ -26,7 +27,7 @@ const passwordHelp            = document.getElementById("passwordHelp");
 
 let currentUser = JSON.parse(localStorage.getItem("currentUser") || "null");
 let shopProducts = [];
-const AVATARS = ["avatar_1", "avatar_2", "avatar_3", "avatar_4", "avatar_5", "avatar_6"];
+const AVATARS = ["avatar_1", "avatar_2", "avatar_3", "avatar_4", "avatar_5", "avatar_6", "avatar_7"];
 
 // ─── Utilidades ───────────────────────────────────────────────────────────────
 
@@ -89,6 +90,10 @@ function renderAvatarState() {
 
     if (!currentUser) {
         sessionAvatarPanel?.classList.add("hidden");
+        sessionAvatarPicker?.classList.add("hidden");
+        if (changeAvatarButton) {
+            changeAvatarButton.textContent = "Cambiar avatar";
+        }
         currentAvatarImage?.classList.add("hidden");
         return;
     }
@@ -115,6 +120,10 @@ async function updateAvatar(avatar) {
     currentUser = await response.json();
     localStorage.setItem("currentUser", JSON.stringify(currentUser));
     renderAvatarState();
+    sessionAvatarPicker?.classList.add("hidden");
+    if (changeAvatarButton) {
+        changeAvatarButton.textContent = "Cambiar avatar";
+    }
 }
 
 // ─── Validaciones ─────────────────────────────────────────────────────────────
@@ -469,6 +478,11 @@ sessionAvatarPicker?.addEventListener("click", async event => {
     } catch (error) {
         setMessage("No se ha podido actualizar el avatar.", "error");
     }
+});
+
+changeAvatarButton?.addEventListener("click", () => {
+    const isHidden = sessionAvatarPicker.classList.toggle("hidden");
+    changeAvatarButton.textContent = isHidden ? "Cambiar avatar" : "Cerrar avatares";
 });
 
 showLogin.addEventListener("click", () => setMode("login"));
