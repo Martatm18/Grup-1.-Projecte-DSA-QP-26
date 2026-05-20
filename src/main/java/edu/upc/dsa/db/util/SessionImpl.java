@@ -1,5 +1,6 @@
 package edu.upc.dsa.db.util;
 
+import edu.upc.dsa.models.Producto;
 import edu.upc.dsa.models.User;
 
 import java.sql.*;
@@ -21,6 +22,13 @@ public class SessionImpl implements Session {
         }
     }
 
+    @Override
+    public void update(Object entity) {
+        if (entity instanceof User) {
+            updateUser((User) entity);
+        }
+    }
+
     private void saveUser(User user) {
         String sql = QueryHelper.createInsertUser();
 
@@ -30,6 +38,33 @@ public class SessionImpl implements Session {
             pstm.setString(3, user.getPassword());
             pstm.setString(4, user.getEmail());
             pstm.setInt(5, user.getEcts());
+
+            pstm.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void updateUser(User user) {
+        String sql = QueryHelper.createUpdateUserEcts();
+
+        try (PreparedStatement pstm = conn.prepareStatement(sql)) {
+            pstm.setInt(1, user.getEcts());
+            pstm.setString(2, user.getId());
+
+            pstm.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void addProductToInventory(String username, Integer productId) {
+        String sql = QueryHelper.createUpsertInventory();
+
+        try (PreparedStatement pstm = conn.prepareStatement(sql)) {
+            pstm.setString(1, username);
+            pstm.setInt(2, productId);
 
             pstm.executeUpdate();
         } catch (SQLException e) {
@@ -56,6 +91,9 @@ public class SessionImpl implements Session {
             while (rs.next()) {
                 if (theClass == User.class) {
                     result.add(buildUser(rs));
+                }
+                else if (theClass == Producto.class) {
+                    result.add(buildProducto(rs));
                 }
             }
 
@@ -91,6 +129,15 @@ public class SessionImpl implements Session {
         user.setEcts(rs.getInt("ects"));
 
         return user;
+    }
+
+    private Producto buildProducto(ResultSet rs) throws SQLException {
+        return new Producto(
+                rs.getInt("id"),
+                rs.getString("name"),
+                rs.getString("description"),
+                rs.getInt("price")
+        );
     }
 
     @Override

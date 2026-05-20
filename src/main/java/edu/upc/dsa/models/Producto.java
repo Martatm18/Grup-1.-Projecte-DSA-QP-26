@@ -3,7 +3,7 @@ package edu.upc.dsa.models;
 public class Producto
 {
     // Atributos básicos de un producto de la tienda
-    private String id;
+    private Integer id;
     private String nombre;
     private String descripcion;
     private int precio; // El coste en la moneda del juego (ECTS)
@@ -12,7 +12,7 @@ public class Producto
     public Producto() {}
 
     // Constructor para inicializar productos rápidamente
-    public Producto(String id, String nombre, String descripcion, int precio)
+    public Producto(Integer id, String nombre, String descripcion, int precio)
     {
         this.id = id;
         this.nombre = nombre;
@@ -21,11 +21,11 @@ public class Producto
     }
 
     // Getters y Setters: permiten leer y modificar los datos desde otras clases
-    public String getId()
+    public Integer getId()
     {
         return id;
     }
-    public void setId(String id)
+    public void setId(Integer id)
     {
         this.id = id;
     }
