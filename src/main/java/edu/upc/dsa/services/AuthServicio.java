@@ -196,6 +196,6 @@ public class AuthServicio
         }
 
         String value = avatar.trim();
-        return value.matches("avatar_[1-7]") ? value : null;
+        return value.matches("avatar_([1-9]|1[0-2])") ? value : null;
     }
 }

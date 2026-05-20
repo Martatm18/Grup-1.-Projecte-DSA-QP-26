@@ -28,7 +28,20 @@ const passwordHelp            = document.getElementById("passwordHelp");
 
 let currentUser = JSON.parse(localStorage.getItem("currentUser") || "null");
 let shopProducts = [];
-const AVATARS = ["avatar_1", "avatar_2", "avatar_3", "avatar_4", "avatar_5", "avatar_6", "avatar_7"];
+const AVATARS = [
+    "avatar_1",
+    "avatar_2",
+    "avatar_3",
+    "avatar_4",
+    "avatar_5",
+    "avatar_6",
+    "avatar_7",
+    "avatar_8",
+    "avatar_9",
+    "avatar_10",
+    "avatar_11",
+    "avatar_12"
+];
 
 // ─── Utilidades ───────────────────────────────────────────────────────────────
 
