@@ -201,14 +201,6 @@ function pwMissing(password) {
     return missing;
 }
 
-function pwMissing(password) {
-    const missing = [];
-    if (password.length < 8)                                      missing.push("minimo 8 caracteres");
-    if (!/[A-Z]/.test(password))                                  missing.push("una mayuscula");
-    if (!/[0-9]/.test(password))                                  missing.push("un numero");
-    if (!/[!@#$%^&*()\-_=+\[\]{};:'"\\|,.<>/?]/.test(password)) missing.push("un caracter especial");
-    return missing;
-}
 
 function backendPasswordMissing(detail) {
     const labels = {
