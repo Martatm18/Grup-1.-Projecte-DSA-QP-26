@@ -340,9 +340,6 @@ function renderProducts() {
     }
 
     products.innerHTML = shopProducts.map(product => {
-        const requiredMission = getRequiredMission(product);
-        const currentMission = currentUser?.gameState?.currentMissionId ?? 1;
-        const isLocked = currentUser && requiredMission > currentMission;
         const canBuy = currentUser && !isLocked && currentUser.ects >= product.precio;
         const buttonText = isLocked ? "Bloqueado" : (canBuy ? "Comprar" : "ECTS insuficientes");
         const lockText = isLocked ? `<span class="lock-badge">Mision ${escapeHtml(requiredMission)}</span>` : "";
@@ -363,11 +360,6 @@ function renderProducts() {
     }).join("");
 }
 
-function getRequiredMission(product) {
-    const explicitValue = product.requiredMissionId ?? product.missionId ?? product.unlockMissionId;
-    const numericValue = Number(explicitValue ?? product.id ?? 1);
-    return Number.isFinite(numericValue) && numericValue > 0 ? numericValue : 1;
-}
 
 function renderRanking() {
     if (!ranking) return;
