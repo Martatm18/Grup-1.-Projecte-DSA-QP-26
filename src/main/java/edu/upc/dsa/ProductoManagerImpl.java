@@ -138,6 +138,7 @@ public class ProductoManagerImpl implements ProductoManager
             return 404;
         }
 
-        return productoDAO.eliminarProductoInventario(user.getId(), productId);
+        // Pasar el precio para que ProductoDAO devuelva los ECTS al usuario
+        return productoDAO.eliminarProductoInventario(user.getId(), productId, producto.getPrecio());
     }
 }
