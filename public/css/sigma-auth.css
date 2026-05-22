@@ -522,3 +522,6 @@ body.session-active .mission-panel {
     border-color: var(--line-strong);
 }
 
+body.session-active #mainTabs {
+    display: grid !important;
+}
