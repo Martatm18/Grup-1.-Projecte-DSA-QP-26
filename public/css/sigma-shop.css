@@ -5,6 +5,9 @@
 
 .product-code {
     width: fit-content;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     padding: 4px 8px;
     border: 1px solid rgba(69, 230, 255, 0.28);
     border-radius: 6px;
@@ -12,6 +15,25 @@
     background: rgba(3, 9, 16, 0.68);
     font-family: "Consolas", "Courier New", monospace;
     font-size: 12px;
+}
+
+.product.locked {
+    border-color: rgba(255, 209, 102, 0.28);
+    opacity: 0.82;
+}
+
+.product.locked h3,
+.product.locked p {
+    color: rgba(237, 247, 255, 0.64);
+}
+
+.lock-badge {
+    padding: 2px 6px;
+    border: 1px solid rgba(255, 209, 102, 0.36);
+    border-radius: 4px;
+    color: var(--warning);
+    background: rgba(70, 43, 2, 0.28);
+    font-size: 10px;
 }
 
 .product-actions {
@@ -37,6 +59,162 @@ button:disabled {
     margin-top: 18px;
     padding-top: 18px;
     border-top: 1px solid var(--line);
+}
+
+.data-panel {
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+}
+
+.data-panel h3 {
+    margin: 0 0 12px;
+    font-size: 20px;
+}
+
+.ranking-list,
+.missions-list {
+    display: grid;
+    gap: 10px;
+}
+
+.ranking-row {
+    display: grid;
+    grid-template-columns: auto 44px minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid rgba(69, 230, 255, 0.18);
+    border-radius: 6px;
+    background: rgba(3, 9, 16, 0.5);
+}
+
+.ranking-row.current-player {
+    border-color: rgba(85, 255, 153, 0.42);
+    background: rgba(4, 42, 24, 0.24);
+}
+
+.ranking-row img {
+    width: 44px;
+    height: 44px;
+    border-radius: 6px;
+    object-fit: cover;
+}
+
+.rank-position,
+.rank-level,
+.mission-index,
+.mission-status,
+.objective-list span {
+    font-family: "Consolas", "Courier New", monospace;
+}
+
+.rank-position {
+    color: var(--cyan);
+    font-weight: 800;
+}
+
+.ranking-row strong,
+.ranking-row small {
+    display: block;
+}
+
+.ranking-row small {
+    margin-top: 2px;
+    color: var(--muted);
+}
+
+.rank-level {
+    padding: 5px 8px;
+    border: 1px solid rgba(85, 255, 153, 0.28);
+    border-radius: 6px;
+    color: var(--green);
+    background: rgba(4, 42, 24, 0.22);
+    font-size: 12px;
+}
+
+.mission-card {
+    display: grid;
+    gap: 10px;
+    padding: 12px;
+    border: 1px solid rgba(69, 230, 255, 0.18);
+    border-radius: 6px;
+    background: rgba(3, 9, 16, 0.5);
+}
+
+.mission-card.active {
+    border-color: rgba(85, 255, 153, 0.42);
+}
+
+.mission-card.locked {
+    border-color: rgba(255, 209, 102, 0.24);
+    opacity: 0.78;
+}
+
+.mission-card-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.mission-index {
+    color: var(--cyan);
+    font-size: 12px;
+    text-transform: uppercase;
+}
+
+.mission-card h4,
+.mission-card p {
+    margin: 0;
+}
+
+.mission-card h4 {
+    margin-top: 3px;
+    font-size: 16px;
+}
+
+.mission-card p {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+.mission-status {
+    flex: 0 0 auto;
+    padding: 5px 8px;
+    border: 1px solid rgba(69, 230, 255, 0.22);
+    border-radius: 6px;
+    color: var(--cyan);
+    background: rgba(3, 9, 16, 0.58);
+    font-size: 12px;
+}
+
+.objective-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+
+.objective-list span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    border: 1px solid rgba(147, 168, 184, 0.24);
+    border-radius: 6px;
+    color: #c7d7e1;
+    background: rgba(8, 18, 31, 0.7);
+    font-size: 12px;
+}
+
+.objective-list .current-objective {
+    border-color: rgba(85, 255, 153, 0.38);
+    color: var(--green);
+}
+
+.objective-list small {
+    color: var(--warning);
 }
 
 .inventory-panel h3 {
@@ -81,5 +259,18 @@ button:disabled {
 @media (max-width: 520px) {
     .product-actions {
         grid-template-columns: 1fr;
+    }
+
+    .ranking-row {
+        grid-template-columns: auto 44px minmax(0, 1fr);
+    }
+
+    .rank-level {
+        grid-column: 2 / -1;
+        width: fit-content;
+    }
+
+    .mission-card-header {
+        display: grid;
     }
 }

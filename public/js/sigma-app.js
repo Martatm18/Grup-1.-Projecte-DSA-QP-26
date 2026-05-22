@@ -10,6 +10,8 @@ const userInfo     = document.getElementById("userInfo");
 const gameStateInfo = document.getElementById("gameStateInfo");
 const products     = document.getElementById("products");
 const inventory    = document.getElementById("inventory");
+const ranking      = document.getElementById("ranking");
+const missions     = document.getElementById("missions");
 const logoutButton = document.getElementById("logoutButton");
 const registerAvatar = document.getElementById("registerAvatar");
 const registerAvatarPicker = document.getElementById("registerAvatarPicker");
@@ -28,6 +30,8 @@ const passwordHelp            = document.getElementById("passwordHelp");
 
 let currentUser = JSON.parse(localStorage.getItem("currentUser") || "null");
 let shopProducts = [];
+let rankingPlayers = [];
+let missionList = [];
 const AVATARS = [
     "avatar_1",
     "avatar_2",
@@ -76,6 +80,8 @@ function clearSession(text) {
     renderAvatarState();
     renderGameState();
     products.innerHTML = `<p class="muted">${escapeHtml(text)}</p>`;
+    renderRanking();
+    renderMissions();
     renderInventory();
 }
 
@@ -251,13 +257,32 @@ async function authRequest(path, body) {
     });
 
     if (!response.ok) {
-        const detail = await response.text();
+        const detail = await readErrorDetail(response);
         const error = new Error(String(response.status));
-        error.detail = detail;
+        error.detail = detail.code || detail.raw || "";
+        error.messageText = detail.message || "";
         throw error;
     }
 
     return response.json();
+}
+
+async function readErrorDetail(response) {
+    const raw = await response.text();
+    if (!raw) {
+        return { code: "", message: "", raw: "" };
+    }
+
+    try {
+        const parsed = JSON.parse(raw);
+        return {
+            code: parsed.code || "",
+            message: parsed.message || "",
+            raw: raw
+        };
+    } catch (error) {
+        return { code: raw, message: raw, raw: raw };
+    }
 }
 
 async function refreshCurrentUser() {
@@ -268,6 +293,36 @@ async function refreshCurrentUser() {
 
     currentUser = await response.json();
     localStorage.setItem("currentUser", JSON.stringify(currentUser));
+}
+
+async function loadRanking() {
+    if (!ranking) {
+        return;
+    }
+
+    const response = await fetch(`${AUTH_API}/ranking`);
+    if (!response.ok) {
+        ranking.innerHTML = '<p class="muted">No se ha podido cargar el ranking.</p>';
+        return;
+    }
+
+    rankingPlayers = await response.json();
+    renderRanking();
+}
+
+async function loadMissions() {
+    if (!missions) {
+        return;
+    }
+
+    const response = await fetch(`${AUTH_API}/misiones`);
+    if (!response.ok) {
+        missions.innerHTML = '<p class="muted">No se han podido cargar las misiones.</p>';
+        return;
+    }
+
+    missionList = await response.json();
+    renderMissions();
 }
 
 // ─── Tienda ───────────────────────────────────────────────────────────────────
@@ -290,12 +345,16 @@ function renderProducts() {
     }
 
     products.innerHTML = shopProducts.map(product => {
-        const canBuy = currentUser && currentUser.ects >= product.precio;
-        const buttonText = canBuy ? "Comprar" : "ECTS insuficientes";
+        const requiredMission = getRequiredMission(product);
+        const currentMission = currentUser?.gameState?.currentMissionId ?? 1;
+        const isLocked = currentUser && requiredMission > currentMission;
+        const canBuy = currentUser && !isLocked && currentUser.ects >= product.precio;
+        const buttonText = isLocked ? "Bloqueado" : (canBuy ? "Comprar" : "ECTS insuficientes");
+        const lockText = isLocked ? `<span class="lock-badge">Mision ${escapeHtml(requiredMission)}</span>` : "";
 
         return `
-            <article class="product">
-                <div class="product-code">OBJ-${escapeHtml(product.id)}</div>
+            <article class="product ${isLocked ? "locked" : ""}">
+                <div class="product-code">OBJ-${escapeHtml(product.id)}${lockText}</div>
                 <h3>${escapeHtml(product.nombre)}</h3>
                 <p>${escapeHtml(product.descripcion)}</p>
                 <div class="product-actions">
@@ -303,6 +362,97 @@ function renderProducts() {
                     <button type="button" data-product-id="${escapeHtml(product.id)}" ${canBuy ? "" : "disabled"}>
                         ${buttonText}
                     </button>
+                </div>
+            </article>
+        `;
+    }).join("");
+}
+
+function getRequiredMission(product) {
+    const explicitValue = product.requiredMissionId ?? product.missionId ?? product.unlockMissionId;
+    const numericValue = Number(explicitValue ?? product.id ?? 1);
+    return Number.isFinite(numericValue) && numericValue > 0 ? numericValue : 1;
+}
+
+function renderRanking() {
+    if (!ranking) {
+        return;
+    }
+
+    if (!currentUser) {
+        ranking.innerHTML = '<p class="muted">Inicia sesion para ver el ranking.</p>';
+        return;
+    }
+
+    if (!rankingPlayers.length) {
+        ranking.innerHTML = '<p class="muted">Todavia no hay jugadores en el ranking.</p>';
+        return;
+    }
+
+    ranking.innerHTML = rankingPlayers.map((player, index) => {
+        const state = player.gameState || {};
+        const missionId = state.currentMissionId ?? 1;
+        const objectiveId = state.currentObjectiveId ?? 1;
+        const missionTitle = state.currentMissionTitle || `Mision ${missionId}`;
+        const isCurrent = player.id === currentUser.id;
+
+        return `
+            <article class="ranking-row ${isCurrent ? "current-player" : ""}">
+                <span class="rank-position">#${index + 1}</span>
+                <img src="${avatarPath(player.avatar)}" alt="Avatar de ${escapeHtml(player.nombre || player.id)}">
+                <div>
+                    <strong>${escapeHtml(player.nombre || player.id)}</strong>
+                    <small>${escapeHtml(missionTitle)} - Objetivo ${escapeHtml(objectiveId)}</small>
+                </div>
+                <span class="rank-level">Nivel ${escapeHtml(missionId)}</span>
+            </article>
+        `;
+    }).join("");
+}
+
+function renderMissions() {
+    if (!missions) {
+        return;
+    }
+
+    if (!currentUser) {
+        missions.innerHTML = '<p class="muted">Las misiones apareceran al iniciar sesion.</p>';
+        return;
+    }
+
+    if (!missionList.length) {
+        missions.innerHTML = '<p class="muted">No hay misiones configuradas todavia.</p>';
+        return;
+    }
+
+    const currentMission = currentUser.gameState?.currentMissionId ?? 1;
+    const currentObjective = currentUser.gameState?.currentObjectiveId ?? 1;
+
+    missions.innerHTML = missionList.map(mission => {
+        const missionId = mission.id ?? mission.missionOrder ?? 1;
+        const isCurrent = missionId === currentMission;
+        const isCompleted = missionId < currentMission;
+        const isLocked = missionId > currentMission;
+        const status = isCompleted ? "Completada" : (isCurrent ? "Activa" : "Bloqueada");
+        const objectives = mission.objectives || [];
+
+        return `
+            <article class="mission-card ${isCurrent ? "active" : ""} ${isLocked ? "locked" : ""}">
+                <div class="mission-card-header">
+                    <div>
+                        <span class="mission-index">Mision ${escapeHtml(missionId)}</span>
+                        <h4>${escapeHtml(mission.title)}</h4>
+                    </div>
+                    <span class="mission-status">${status}</span>
+                </div>
+                <p>${escapeHtml(mission.description)}</p>
+                <div class="objective-list">
+                    ${objectives.length ? objectives.map(objective => `
+                        <span class="${objective.id === currentObjective && isCurrent ? "current-objective" : ""}">
+                            ${escapeHtml(objective.title)}
+                            ${objective.reward ? `<small>+${escapeHtml(objective.reward)} ECTS</small>` : ""}
+                        </span>
+                    `).join("") : '<span class="muted">Sin objetivos definidos.</span>'}
                 </div>
             </article>
         `;
@@ -397,6 +547,8 @@ async function buyProduct(productId) {
         renderAvatarState();
         renderGameState();
         renderProducts();
+        await loadRanking();
+        await loadMissions();
         renderInventory();
         setMessage("Objeto adquirido. Inventario sincronizado.", "ok");
     } catch (error) {
@@ -417,6 +569,8 @@ async function renderSession() {
         renderAvatarState();
         renderGameState();
         products.innerHTML = '<p class="muted">Los productos apareceran al iniciar sesion.</p>';
+        renderRanking();
+        renderMissions();
         renderInventory();
         return;
     }
@@ -428,6 +582,8 @@ async function renderSession() {
         renderGameState();
         logoutButton.classList.remove("hidden");
         await loadProducts();
+        await loadRanking();
+        await loadMissions();
         renderInventory();
     } catch (error) {
         clearSession("Los productos apareceran al iniciar sesion.");

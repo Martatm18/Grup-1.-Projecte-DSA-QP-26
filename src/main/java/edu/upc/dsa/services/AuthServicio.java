@@ -2,12 +2,17 @@ package edu.upc.dsa.services;
 
 import edu.upc.dsa.ProductoManager;
 import edu.upc.dsa.ProductoManagerImpl;
+import edu.upc.dsa.db.GameStateDAO;
 import edu.upc.dsa.db.UserDAO;
+import edu.upc.dsa.models.ApiError;
 import edu.upc.dsa.models.AuthRequest;
+import edu.upc.dsa.models.Mission;
 import edu.upc.dsa.models.User;
 import io.swagger.annotations.Api;
+import org.apache.log4j.Logger;
 
 import javax.ws.rs.*;
+import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
@@ -17,13 +22,17 @@ import java.util.List;
 @Path("/auth")
 public class AuthServicio
 {
+    private static final Logger logger = Logger.getLogger(AuthServicio.class);
+
     private ProductoManager pm;
     private UserDAO userDAO;
+    private GameStateDAO gameStateDAO;
 
     public AuthServicio()
     {
         this.pm = ProductoManagerImpl.getInstance();
         this.userDAO = new UserDAO();
+        this.gameStateDAO = new GameStateDAO();
     }
 
     @POST
@@ -32,44 +41,47 @@ public class AuthServicio
     @Produces(MediaType.APPLICATION_JSON)
     public Response register(AuthRequest request)
     {
-        if (request == null || isBlank(request.getId()) || isBlank(request.getPassword()) || isBlank(request.getEmail()))
-        {
-            return badRequest("MISSING_REQUIRED_FIELDS");
-        }
-
-        if (!isValidEmail(request.getEmail()))
-        {
-            return badRequest("INVALID_EMAIL");
-        }
-
-        List<String> missingPasswordRules = passwordMissingRules(request.getPassword());
-        if (!missingPasswordRules.isEmpty())
-        {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("WEAK_PASSWORD:" + String.join(",", missingPasswordRules))
-                    .build();
-        }
-
-        int status = pm.registerUser(request.getId(), request.getNombre(), request.getPassword(), request.getEmail());
-        if (status == 201)
-        {
-            String avatar = cleanAvatar(request.getAvatar());
-            if (avatar != null)
+        try {
+            if (request == null || isBlank(request.getId()) || isBlank(request.getPassword()) || isBlank(request.getEmail()))
             {
-                userDAO.updateAvatar(request.getId().trim(), avatar);
+                return badRequest("MISSING_REQUIRED_FIELDS", "Rellena usuario, correo y contrasena.");
             }
-            return Response.status(Response.Status.CREATED).entity(pm.getUser(request.getId().trim())).build();
-        }
-        if (status == UserDAO.USERNAME_EXISTS)
-        {
-            return Response.status(Response.Status.CONFLICT).entity("USERNAME_EXISTS").build();
-        }
-        if (status == UserDAO.EMAIL_EXISTS)
-        {
-            return Response.status(Response.Status.CONFLICT).entity("EMAIL_EXISTS").build();
-        }
 
-        return Response.status(status).entity("REGISTER_ERROR").build();
+            if (!isValidEmail(request.getEmail()))
+            {
+                return badRequest("INVALID_EMAIL", "Introduce un correo electronico valido.");
+            }
+
+            List<String> missingPasswordRules = passwordMissingRules(request.getPassword());
+            if (!missingPasswordRules.isEmpty())
+            {
+                return badRequest("WEAK_PASSWORD:" + String.join(",", missingPasswordRules), "La contrasena no cumple los requisitos minimos.");
+            }
+
+            int status = pm.registerUser(request.getId(), request.getNombre(), request.getPassword(), request.getEmail());
+            if (status == 201)
+            {
+                String avatar = cleanAvatar(request.getAvatar());
+                if (avatar != null)
+                {
+                    userDAO.updateAvatar(request.getId().trim(), avatar);
+                }
+                return Response.status(Response.Status.CREATED).entity(pm.getUser(request.getId().trim())).build();
+            }
+            if (status == UserDAO.USERNAME_EXISTS)
+            {
+                return error(Response.Status.CONFLICT, "USERNAME_EXISTS", "Ese nombre de usuario ya existe.");
+            }
+            if (status == UserDAO.EMAIL_EXISTS)
+            {
+                return error(Response.Status.CONFLICT, "EMAIL_EXISTS", "Ese correo electronico ya esta registrado.");
+            }
+
+            return error(status, "REGISTER_ERROR", "No se ha podido crear la cuenta.");
+        } catch (Exception e) {
+            logger.error("Register error", e);
+            return serverError();
+        }
     }
 
     @POST
@@ -78,28 +90,36 @@ public class AuthServicio
     @Produces(MediaType.APPLICATION_JSON)
     public Response login(AuthRequest request)
     {
-        if (request == null || isBlank(request.getPassword()) || (isBlank(request.getId()) && isBlank(request.getEmail())))
-        {
-            return badRequest("MISSING_REQUIRED_FIELDS");
-        }
+        try {
+            if (request == null || isBlank(request.getPassword()) || (isBlank(request.getId()) && isBlank(request.getEmail())))
+            {
+                return badRequest("MISSING_REQUIRED_FIELDS", "Rellena usuario o correo y contrasena.");
+            }
 
-        User user;
-        if (!isBlank(request.getEmail()))
-        {
-            user = userDAO.loginUserByEmail(request.getEmail().trim().toLowerCase(), request.getPassword());
-        }
-        else
-        {
-            user = pm.loginUser(request.getId(), request.getPassword());
-        }
+            User user;
+            if (!isBlank(request.getEmail()))
+            {
+                if (!isValidEmail(request.getEmail())) {
+                    return badRequest("INVALID_EMAIL", "Introduce un correo electronico valido.");
+                }
+                user = userDAO.loginUserByEmail(request.getEmail().trim().toLowerCase(), request.getPassword());
+            }
+            else
+            {
+                user = pm.loginUser(request.getId(), request.getPassword());
+            }
 
-        if (user == null)
-        {
-            return Response.status(Response.Status.UNAUTHORIZED).build();
-        }
+            if (user == null)
+            {
+                return error(Response.Status.UNAUTHORIZED, "INVALID_CREDENTIALS", "Usuario, correo o contrasena incorrectos.");
+            }
 
-        user = pm.getUser(user.getId());
-        return Response.ok(user).build();
+            user = pm.getUser(user.getId());
+            return Response.ok(user).build();
+        } catch (Exception e) {
+            logger.error("Login error", e);
+            return serverError();
+        }
     }
 
     // Nuevo endpoint: login por email
@@ -109,24 +129,38 @@ public class AuthServicio
     @Produces(MediaType.APPLICATION_JSON)
     public Response loginByEmail(AuthRequest request)
     {
-        if (request == null || isBlank(request.getEmail()) || isBlank(request.getPassword()))
-        {
-            return badRequest("MISSING_REQUIRED_FIELDS");
-        }
+        try {
+            if (request == null || isBlank(request.getEmail()) || isBlank(request.getPassword()))
+            {
+                return badRequest("MISSING_REQUIRED_FIELDS", "Rellena correo y contrasena.");
+            }
 
-        User user = userDAO.loginUserByEmail(request.getEmail().trim().toLowerCase(), request.getPassword());
-        if (user == null)
-        {
-            return Response.status(Response.Status.UNAUTHORIZED).build();
-        }
+            if (!isValidEmail(request.getEmail())) {
+                return badRequest("INVALID_EMAIL", "Introduce un correo electronico valido.");
+            }
 
-        user = pm.getUser(user.getId());
-        return Response.ok(user).build();
+            User user = userDAO.loginUserByEmail(request.getEmail().trim().toLowerCase(), request.getPassword());
+            if (user == null)
+            {
+                return error(Response.Status.UNAUTHORIZED, "INVALID_CREDENTIALS", "Correo o contrasena incorrectos.");
+            }
+
+            user = pm.getUser(user.getId());
+            return Response.ok(user).build();
+        } catch (Exception e) {
+            logger.error("Login by email error", e);
+            return serverError();
+        }
     }
 
     private Response badRequest(String message)
     {
-        return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
+        return badRequest(message, "Peticion incorrecta.");
+    }
+
+    private Response badRequest(String code, String message)
+    {
+        return error(Response.Status.BAD_REQUEST, code, message);
     }
 
     private boolean isBlank(String value)
@@ -154,13 +188,48 @@ public class AuthServicio
     @Produces(MediaType.APPLICATION_JSON)
     public Response getUser(@PathParam("idUser") String idUser)
     {
-        User user = pm.getUser(idUser);
-        if (user == null)
-        {
-            return Response.status(Response.Status.NOT_FOUND).build();
-        }
+        try {
+            User user = pm.getUser(idUser);
+            if (user == null)
+            {
+                return error(Response.Status.NOT_FOUND, "USER_NOT_FOUND", "Usuario no encontrado.");
+            }
 
-        return Response.ok(user).build();
+            return Response.ok(user).build();
+        } catch (Exception e) {
+            logger.error("Get user error", e);
+            return serverError();
+        }
+    }
+
+    @GET
+    @Path("/ranking")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getRanking()
+    {
+        try {
+            List<User> ranking = userDAO.getRanking();
+            GenericEntity<List<User>> entity = new GenericEntity<List<User>>(ranking) {};
+            return Response.ok(entity).build();
+        } catch (Exception e) {
+            logger.error("Ranking error", e);
+            return serverError();
+        }
+    }
+
+    @GET
+    @Path("/misiones")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getMisiones()
+    {
+        try {
+            List<Mission> missions = gameStateDAO.getMissionsWithObjectives();
+            GenericEntity<List<Mission>> entity = new GenericEntity<List<Mission>>(missions) {};
+            return Response.ok(entity).build();
+        } catch (Exception e) {
+            logger.error("Missions error", e);
+            return serverError();
+        }
     }
 
     @PUT
@@ -168,24 +237,33 @@ public class AuthServicio
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateAvatar(@PathParam("idUser") String idUser, @PathParam("avatar") String avatar)
     {
-        if (isBlank(idUser))
-        {
-            return badRequest("MISSING_USER");
-        }
+        try {
+            if (isBlank(idUser))
+            {
+                return badRequest("MISSING_USER", "Falta el usuario.");
+            }
 
-        String cleanAvatar = cleanAvatar(avatar);
-        if (cleanAvatar == null)
-        {
-            return badRequest("INVALID_AVATAR");
-        }
+            String cleanAvatar = cleanAvatar(avatar);
+            if (cleanAvatar == null)
+            {
+                return badRequest("INVALID_AVATAR", "Avatar no valido.");
+            }
 
-        int status = userDAO.updateAvatar(idUser.trim(), cleanAvatar);
-        if (status != 204)
-        {
-            return Response.status(status).build();
-        }
+            int status = userDAO.updateAvatar(idUser.trim(), cleanAvatar);
+            if (status == 404)
+            {
+                return error(Response.Status.NOT_FOUND, "USER_NOT_FOUND", "Usuario no encontrado.");
+            }
+            if (status != 204)
+            {
+                return serverError();
+            }
 
-        return Response.ok(pm.getUser(idUser.trim())).build();
+            return Response.ok(pm.getUser(idUser.trim())).build();
+        } catch (Exception e) {
+            logger.error("Update avatar error", e);
+            return serverError();
+        }
     }
 
     private String cleanAvatar(String avatar)
@@ -197,5 +275,27 @@ public class AuthServicio
 
         String value = avatar.trim();
         return value.matches("avatar_([1-9]|1[0-2])") ? value : null;
+    }
+
+    private Response error(Response.Status status, String code, String message)
+    {
+        if (status == null) {
+            status = Response.Status.INTERNAL_SERVER_ERROR;
+        }
+
+        return Response.status(status)
+                .entity(new ApiError(code, message))
+                .build();
+    }
+
+    private Response error(int status, String code, String message)
+    {
+        Response.Status responseStatus = Response.Status.fromStatusCode(status);
+        return error(responseStatus == null ? Response.Status.INTERNAL_SERVER_ERROR : responseStatus, code, message);
+    }
+
+    private Response serverError()
+    {
+        return error(Response.Status.INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR", "Error interno del servidor.");
     }
 }

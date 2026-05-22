@@ -1,11 +1,15 @@
 package edu.upc.dsa.models;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Mission {
     private Integer id;
     private String title;
     private String description;
     private int missionOrder;
     private boolean active;
+    private List<Objective> objectives;
 
     public Mission() {}
 
@@ -15,6 +19,7 @@ public class Mission {
         this.description = description;
         this.missionOrder = missionOrder;
         this.active = active;
+        this.objectives = new ArrayList<>();
     }
 
     public Integer getId() {
@@ -55,5 +60,13 @@ public class Mission {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public List<Objective> getObjectives() {
+        return objectives;
+    }
+
+    public void setObjectives(List<Objective> objectives) {
+        this.objectives = objectives;
     }
 }
