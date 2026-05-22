@@ -72,9 +72,14 @@ function setMode(mode) {
     setMessage("", "");
 }
 
+function renderShellState() {
+    document.body.classList.toggle("session-active", Boolean(currentUser));
+}
+
 function clearSession(text) {
     currentUser = null;
     localStorage.clear();
+    renderShellState();
     userInfo.textContent = "Inicia sesion para ver tu saldo.";
     logoutButton.classList.add("hidden");
     renderAvatarState();
@@ -563,6 +568,8 @@ async function buyProduct(productId) {
 }
 
 async function renderSession() {
+    renderShellState();
+
     if (!currentUser) {
         userInfo.textContent = "Inicia sesion para ver tu saldo.";
         logoutButton.classList.add("hidden");
@@ -577,6 +584,7 @@ async function renderSession() {
 
     try {
         await refreshCurrentUser();
+        renderShellState();
         userInfo.textContent = `${currentUser.nombre} - ${currentUser.ects} ECTS`;
         renderAvatarState();
         renderGameState();
