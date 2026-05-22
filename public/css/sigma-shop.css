@@ -1,6 +1,160 @@
+.access-header {
+    text-align: center;
+}
+
+h1 {
+    font-size: clamp(32px, 5.5vw, 54px);
+}
+
+.user-summary {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    min-width: 0;
+}
+
+.current-avatar {
+    width: 90px;
+    height: 120px;
+    flex: 0 0 auto;
+    border: 1px solid rgba(69, 230, 255, 0.46);
+    border-radius: 8px;
+    object-fit: cover;
+    background: rgba(3, 9, 16, 0.78);
+    box-shadow: 0 0 14px rgba(69, 230, 255, 0.16);
+}
+
+.avatar-section {
+    display: grid;
+    gap: 8px;
+}
+
+.avatar-picker {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+}
+
+.avatar-picker.profile-picker {
+    grid-template-columns: repeat(4, 52px);
+    justify-content: end;
+}
+
+.avatar-option {
+    display: grid;
+    place-items: center;
+    min-width: 0;
+    padding: 3px;
+    border: 1px solid rgba(69, 230, 255, 0.26);
+    border-radius: 6px;
+    background: rgba(3, 9, 16, 0.68);
+    box-shadow: none;
+    transition: all 0.2s ease;
+}
+
+.avatar-option:hover,
+.avatar-option.selected {
+    border-color: var(--green);
+    box-shadow: 0 0 12px rgba(85, 255, 153, 0.2);
+    transform: scale(1.05);
+}
+
+.avatar-option img {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 4px;
+    object-fit: cover;
+}
+
+.session-avatar-panel {
+    display: grid;
+    gap: 10px;
+    justify-items: end;
+}
+
+.avatar-change-button {
+    padding: 8px 12px;
+    font-size: 11px;
+}
+
+.profile-picker .avatar-option {
+    width: 52px;
+    height: 52px;
+}
+
+.session-avatar-panel.hidden,
+.current-avatar.hidden,
+.avatar-picker.hidden,
+.game-state-info.hidden {
+    display: none;
+}
+
+.game-state-info {
+    display: grid;
+    gap: 6px;
+    margin-top: 8px;
+    max-width: 340px;
+}
+
+.health-row,
+.mission-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    font-family: "Consolas", "Courier New", monospace;
+    font-size: 12px;
+}
+
+.health-row span,
+.mission-row small {
+    color: var(--muted);
+}
+
+.health-row strong {
+    color: var(--green);
+}
+
+.health-track {
+    height: 6px;
+    overflow: hidden;
+    border: 1px solid rgba(85, 255, 153, 0.28);
+    border-radius: 999px;
+    background: rgba(3, 9, 16, 0.72);
+}
+
+.health-track span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--green), var(--cyan));
+}
+
+.mission-row {
+    flex-direction: column;
+    align-items: flex-start;
+    padding-top: 2px;
+}
+
+.mission-row span {
+    color: var(--text);
+    font-weight: 800;
+}
+
 .product {
     display: grid;
     gap: 10px;
+    padding: 14px;
+}
+
+.product h3 {
+    font-size: 15px;
+    margin-bottom: 4px;
+}
+
+.product p {
+    font-size: 13px;
+    min-height: 38px;
 }
 
 .product-code {
@@ -14,12 +168,12 @@
     color: var(--cyan);
     background: rgba(3, 9, 16, 0.68);
     font-family: "Consolas", "Courier New", monospace;
-    font-size: 12px;
+    font-size: 11px;
 }
 
 .product.locked {
     border-color: rgba(255, 209, 102, 0.28);
-    opacity: 0.82;
+    opacity: 0.75;
 }
 
 .product.locked h3,
@@ -44,14 +198,14 @@
 }
 
 .product-actions button {
-    min-height: 34px;
-    padding: 8px 10px;
-    font-size: 12px;
+    min-height: 32px;
+    padding: 6px 10px;
+    font-size: 11px;
 }
 
 button:disabled {
     cursor: not-allowed;
-    opacity: 0.52;
+    opacity: 0.4;
     transform: none;
 }
 
@@ -69,191 +223,198 @@ button:disabled {
 
 .data-panel h3 {
     margin: 0 0 12px;
-    font-size: 20px;
+    font-size: 18px;
 }
 
 .ranking-list,
 .missions-list {
     display: grid;
-    gap: 10px;
+    gap: 8px;
 }
 
+/* Reparación crítica del layout del Ranking */
 .ranking-row {
     display: grid;
-    grid-template-columns: auto 44px minmax(0, 1fr) auto;
-    gap: 10px;
+    grid-template-columns: 28px 38px minmax(0, 1fr) auto;
+    gap: 12px;
     align-items: center;
-    padding: 10px;
-    border: 1px solid rgba(69, 230, 255, 0.18);
+    padding: 8px 12px;
+    border: 1px solid rgba(69, 230, 255, 0.15);
     border-radius: 6px;
-    background: rgba(3, 9, 16, 0.5);
+    background: rgba(3, 9, 16, 0.45);
 }
 
 .ranking-row.current-player {
     border-color: rgba(85, 255, 153, 0.42);
     background: rgba(4, 42, 24, 0.24);
+    box-shadow: inset 0 0 8px rgba(85, 255, 153, 0.05);
 }
 
+/* Control estricto de tamaño del avatar del Ranking */
 .ranking-row img {
-    width: 44px;
-    height: 44px;
-    border-radius: 6px;
+    width: 38px;
+    height: 38px;
+    border-radius: 4px;
     object-fit: cover;
-}
-
-.rank-position,
-.rank-level,
-.mission-index,
-.mission-status,
-.objective-list span {
-    font-family: "Consolas", "Courier New", monospace;
+    border: 1px solid rgba(69, 230, 255, 0.3);
 }
 
 .rank-position {
     color: var(--cyan);
     font-weight: 800;
+    font-size: 14px;
+    text-align: center;
 }
 
-.ranking-row strong,
-.ranking-row small {
-    display: block;
+.ranking-row strong {
+    font-size: 14px;
+    color: var(--text);
 }
 
 .ranking-row small {
-    margin-top: 2px;
+    margin-top: 1px;
     color: var(--muted);
+    font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .rank-level {
-    padding: 5px 8px;
-    border: 1px solid rgba(85, 255, 153, 0.28);
-    border-radius: 6px;
+    padding: 4px 8px;
+    border: 1px solid rgba(85, 255, 153, 0.25);
+    border-radius: 4px;
     color: var(--green);
-    background: rgba(4, 42, 24, 0.22);
-    font-size: 12px;
+    background: rgba(4, 42, 24, 0.3);
+    font-size: 11px;
+    font-weight: bold;
 }
 
 .mission-card {
     display: grid;
     gap: 10px;
     padding: 12px;
-    border: 1px solid rgba(69, 230, 255, 0.18);
+    border: 1px solid rgba(69, 230, 255, 0.16);
     border-radius: 6px;
     background: rgba(3, 9, 16, 0.5);
 }
 
 .mission-card.active {
-    border-color: rgba(85, 255, 153, 0.42);
+    border-color: rgba(85, 255, 153, 0.35);
+    background: rgba(8, 22, 21, 0.25);
 }
 
 .mission-card.locked {
-    border-color: rgba(255, 209, 102, 0.24);
-    opacity: 0.78;
+    border-color: rgba(255, 209, 102, 0.15);
+    opacity: 0.65;
 }
 
 .mission-card-header {
     display: flex;
     justify-content: space-between;
     gap: 12px;
-    align-items: flex-start;
+    align-items: center;
 }
 
 .mission-index {
     color: var(--cyan);
-    font-size: 12px;
+    font-size: 11px;
     text-transform: uppercase;
-}
-
-.mission-card h4,
-.mission-card p {
-    margin: 0;
+    font-weight: bold;
 }
 
 .mission-card h4 {
-    margin-top: 3px;
-    font-size: 16px;
+    margin: 2px 0 4px 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: #ffffff;
 }
 
 .mission-card p {
     color: var(--muted);
-    font-size: 14px;
-    line-height: 1.45;
+    font-size: 12.5px;
+    line-height: 1.4;
+    margin: 0 0 6px 0;
 }
 
 .mission-status {
     flex: 0 0 auto;
-    padding: 5px 8px;
-    border: 1px solid rgba(69, 230, 255, 0.22);
-    border-radius: 6px;
+    padding: 4px 8px;
+    border: 1px solid rgba(69, 230, 255, 0.2);
+    border-radius: 4px;
     color: var(--cyan);
-    background: rgba(3, 9, 16, 0.58);
-    font-size: 12px;
+    background: rgba(3, 9, 16, 0.6);
+    font-size: 11px;
 }
 
 .objective-list {
     display: flex;
     flex-wrap: wrap;
-    gap: 7px;
+    gap: 6px;
+    padding-top: 4px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .objective-list span {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 6px 8px;
-    border: 1px solid rgba(147, 168, 184, 0.24);
-    border-radius: 6px;
-    color: #c7d7e1;
-    background: rgba(8, 18, 31, 0.7);
-    font-size: 12px;
+    gap: 5px;
+    padding: 4px 8px;
+    border: 1px solid rgba(147, 168, 184, 0.18);
+    border-radius: 4px;
+    color: #a4b3bd;
+    background: rgba(5, 12, 22, 0.6);
+    font-size: 11px;
 }
 
 .objective-list .current-objective {
-    border-color: rgba(85, 255, 153, 0.38);
+    border-color: rgba(85, 255, 153, 0.35);
     color: var(--green);
+    background: rgba(4, 32, 20, 0.3);
 }
 
 .objective-list small {
     color: var(--warning);
+    font-weight: bold;
 }
 
 .inventory-panel h3 {
     margin: 0 0 12px;
-    font-size: 20px;
+    font-size: 18px;
 }
 
 .inventory-list {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 6px;
 }
 
 .inventory-chip {
     display: inline-flex;
     align-items: center;
-    gap: 7px;
-    padding: 7px 10px;
-    border: 1px solid rgba(85, 255, 153, 0.32);
-    border-radius: 6px;
+    gap: 6px;
+    padding: 5px 8px;
+    border: 1px solid rgba(85, 255, 153, 0.25);
+    border-radius: 5px;
     color: var(--green);
-    background: rgba(4, 42, 24, 0.28);
+    background: rgba(4, 42, 24, 0.25);
     font-family: "Consolas", "Courier New", monospace;
-    font-size: 13px;
+    font-size: 12px;
 }
 
 .inventory-delete {
-    min-height: 24px;
-    padding: 3px 7px;
-    border-color: rgba(255, 77, 102, 0.42);
-    background: rgba(55, 5, 15, 0.42);
+    min-height: 20px;
+    padding: 2px 6px;
+    border-color: rgba(255, 77, 102, 0.35);
+    background: rgba(55, 5, 15, 0.4);
     color: #ffb6c0;
     box-shadow: none;
-    font-size: 10px;
+    font-size: 9px;
 }
 
 .inventory-delete:hover {
     border-color: var(--red);
-    box-shadow: 0 0 16px rgba(255, 77, 102, 0.2);
+    box-shadow: 0 0 12px rgba(255, 77, 102, 0.2);
 }
 
 @media (max-width: 520px) {
@@ -262,15 +423,23 @@ button:disabled {
     }
 
     .ranking-row {
-        grid-template-columns: auto 44px minmax(0, 1fr);
+        grid-template-columns: 24px 36px minmax(0, 1fr);
+        gap: 8px;
     }
 
     .rank-level {
-        grid-column: 2 / -1;
-        width: fit-content;
+        grid-column: 3;
+        justify-self: start;
+        margin-top: 4px;
     }
 
     .mission-card-header {
-        display: grid;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+    }
+
+    .mission-status {
+        align-self: flex-start;
     }
 }
