@@ -20,6 +20,15 @@ const sessionAvatarPicker = document.getElementById("sessionAvatarPicker");
 const currentAvatarImage = document.getElementById("currentAvatarImage");
 const changeAvatarButton = document.getElementById("changeAvatarButton");
 
+// Pestañas
+const mainTabs     = document.getElementById("mainTabs");
+const tabShop      = document.getElementById("tabShop");
+const tabRanking   = document.getElementById("tabRanking");
+const tabMissions  = document.getElementById("tabMissions");
+const viewShop     = document.getElementById("viewShop");
+const viewRanking  = document.getElementById("viewRanking");
+const viewMissions = document.getElementById("viewMissions");
+
 // Elementos de validación del registro
 const registerEmail           = document.getElementById("registerEmail");
 const registerPassword        = document.getElementById("registerPassword");
@@ -33,19 +42,34 @@ let shopProducts = [];
 let rankingPlayers = [];
 let missionList = [];
 const AVATARS = [
-    "avatar_1",
-    "avatar_2",
-    "avatar_3",
-    "avatar_4",
-    "avatar_5",
-    "avatar_6",
-    "avatar_7",
-    "avatar_8",
-    "avatar_9",
-    "avatar_10",
-    "avatar_11",
-    "avatar_12"
+    "avatar_1","avatar_2","avatar_3","avatar_4","avatar_5","avatar_6",
+    "avatar_7","avatar_8","avatar_9","avatar_10","avatar_11","avatar_12"
 ];
+
+// ─── Pestañas ─────────────────────────────────────────────────────────────────
+
+function setTab(tab) {
+    const views = { shop: viewShop, ranking: viewRanking, missions: viewMissions };
+    const btns  = { shop: tabShop,  ranking: tabRanking,  missions: tabMissions  };
+
+    Object.entries(views).forEach(([key, el]) => {
+        el.classList.toggle("hidden", key !== tab);
+    });
+    Object.entries(btns).forEach(([key, btn]) => {
+        btn.classList.toggle("secondary", key !== tab);
+        btn.classList.toggle("active", key === tab);
+    });
+}
+
+tabShop?.addEventListener("click",     () => setTab("shop"));
+tabRanking?.addEventListener("click",  async () => {
+    setTab("ranking");
+    if (!rankingPlayers.length) await loadRanking();
+});
+tabMissions?.addEventListener("click", async () => {
+    setTab("missions");
+    if (!missionList.length) await loadMissions();
+});
 
 // ─── Utilidades ───────────────────────────────────────────────────────────────
 
@@ -74,6 +98,7 @@ function setMode(mode) {
 
 function renderShellState() {
     document.body.classList.toggle("session-active", Boolean(currentUser));
+    mainTabs?.classList.toggle("hidden", !currentUser);
 }
 
 function clearSession(text) {
@@ -85,9 +110,10 @@ function clearSession(text) {
     renderAvatarState();
     renderGameState();
     products.innerHTML = `<p class="muted">${escapeHtml(text)}</p>`;
-    renderRanking();
-    renderMissions();
+    ranking.innerHTML = '<p class="muted">Inicia sesion para ver el ranking.</p>';
+    missions.innerHTML = '<p class="muted">Las misiones apareceran al iniciar sesion.</p>';
     renderInventory();
+    setTab("shop");
 }
 
 function cleanAvatar(avatar) {
@@ -99,10 +125,7 @@ function avatarPath(avatar) {
 }
 
 function markSelectedAvatar(container, avatar) {
-    if (!container) {
-        return;
-    }
-
+    if (!container) return;
     const selectedAvatar = cleanAvatar(avatar);
     container.querySelectorAll(".avatar-option").forEach(button => {
         button.classList.toggle("selected", button.dataset.avatar === selectedAvatar);
@@ -117,9 +140,7 @@ function renderAvatarState() {
     if (!currentUser) {
         sessionAvatarPanel?.classList.add("hidden");
         sessionAvatarPicker?.classList.add("hidden");
-        if (changeAvatarButton) {
-            changeAvatarButton.textContent = "Cambiar avatar";
-        }
+        if (changeAvatarButton) changeAvatarButton.textContent = "Cambiar avatar";
         currentAvatarImage?.classList.add("hidden");
         return;
     }
@@ -130,9 +151,7 @@ function renderAvatarState() {
 }
 
 function renderGameState() {
-    if (!gameStateInfo) {
-        return;
-    }
+    if (!gameStateInfo) return;
 
     const state = currentUser?.gameState;
     if (!currentUser || !state) {
@@ -164,26 +183,20 @@ function renderGameState() {
 }
 
 async function updateAvatar(avatar) {
-    if (!currentUser) {
-        return;
-    }
+    if (!currentUser) return;
 
     const selectedAvatar = cleanAvatar(avatar);
     const response = await fetch(`${AUTH_API}/usuarios/${encodeURIComponent(currentUser.id)}/avatar/${encodeURIComponent(selectedAvatar)}`, {
         method: "PUT"
     });
 
-    if (!response.ok) {
-        throw new Error(String(response.status));
-    }
+    if (!response.ok) throw new Error(String(response.status));
 
     currentUser = await response.json();
     localStorage.setItem("currentUser", JSON.stringify(currentUser));
     renderAvatarState();
     sessionAvatarPicker?.classList.add("hidden");
-    if (changeAvatarButton) {
-        changeAvatarButton.textContent = "Cambiar avatar";
-    }
+    if (changeAvatarButton) changeAvatarButton.textContent = "Cambiar avatar";
 }
 
 // ─── Validaciones ─────────────────────────────────────────────────────────────
@@ -194,22 +207,20 @@ function isValidEmail(v) {
 
 function pwMissing(password) {
     const missing = [];
-    if (password.length < 8)                                              missing.push("mínimo 8 caracteres");
-    if (!/[A-Z]/.test(password))                                          missing.push("una mayúscula");
-    if (!/[0-9]/.test(password))                                          missing.push("un número");
-    if (!/[!@#$%^&*()\-_=+\[\]{};:'"\\|,.<>/?]/.test(password))         missing.push("un carácter especial");
+    if (password.length < 8)                                             missing.push("minimo 8 caracteres");
+    if (!/[A-Z]/.test(password))                                         missing.push("una mayuscula");
+    if (!/[0-9]/.test(password))                                         missing.push("un numero");
+    if (!/[!@#$%^&*()\-_=+\[\]{};:'"\\|,.<>/?]/.test(password))        missing.push("un caracter especial");
     return missing;
 }
-
 
 function backendPasswordMissing(detail) {
     const labels = {
         MIN_LENGTH: "minimo 8 caracteres",
-        UPPERCASE: "una mayuscula",
-        NUMBER: "un numero",
-        SPECIAL: "un caracter especial"
+        UPPERCASE:  "una mayuscula",
+        NUMBER:     "un numero",
+        SPECIAL:    "un caracter especial"
     };
-
     return String(detail || "")
         .replace("WEAK_PASSWORD:", "")
         .split(",")
@@ -223,7 +234,6 @@ function updatePasswordHelp() {
     passwordHelp.textContent = missing.length === 0 ? "" : "Falta: " + missing.join(", ") + ".";
 }
 
-// Email registro: error en tiempo real
 registerEmail.addEventListener("input", () => {
     const v = registerEmail.value;
     emailError.classList.toggle("hidden", !v || isValidEmail(v));
@@ -232,7 +242,6 @@ registerEmail.addEventListener("blur", () => {
     emailError.classList.toggle("hidden", isValidEmail(registerEmail.value));
 });
 
-// Confirmar contraseña: error en tiempo real
 confirmRegisterPassword.addEventListener("input", () => {
     const match = registerPassword.value === confirmRegisterPassword.value;
     confirmError.classList.toggle("hidden", match || !confirmRegisterPassword.value);
@@ -266,60 +275,50 @@ async function authRequest(path, body) {
 
 async function readErrorDetail(response) {
     const raw = await response.text();
-    if (!raw) {
-        return { code: "", message: "", raw: "" };
-    }
-
+    if (!raw) return { code: "", message: "", raw: "" };
     try {
         const parsed = JSON.parse(raw);
-        return {
-            code: parsed.code || "",
-            message: parsed.message || "",
-            raw: raw
-        };
-    } catch (error) {
-        return { code: raw, message: raw, raw: raw };
+        return { code: parsed.code || "", message: parsed.message || "", raw };
+    } catch {
+        return { code: raw, message: raw, raw };
     }
 }
 
 async function refreshCurrentUser() {
     const response = await fetch(`${AUTH_API}/usuarios/${encodeURIComponent(currentUser.id)}`);
-    if (!response.ok) {
-        throw new Error(String(response.status));
-    }
-
+    if (!response.ok) throw new Error(String(response.status));
     currentUser = await response.json();
     localStorage.setItem("currentUser", JSON.stringify(currentUser));
 }
 
 async function loadRanking() {
-    if (!ranking) {
-        return;
-    }
-
-    const response = await fetch(`${AUTH_API}/ranking`);
-    if (!response.ok) {
+    if (!ranking) return;
+    try {
+        const response = await fetch(`${AUTH_API}/ranking`);
+        if (!response.ok) {
+            ranking.innerHTML = '<p class="muted">No se ha podido cargar el ranking.</p>';
+            return;
+        }
+        rankingPlayers = await response.json();
+        renderRanking();
+    } catch {
         ranking.innerHTML = '<p class="muted">No se ha podido cargar el ranking.</p>';
-        return;
     }
-
-    rankingPlayers = await response.json();
-    renderRanking();
 }
 
 async function loadMissions() {
-    if (!missions) {
-        return;
-    }
-
-    const response = await fetch(`${AUTH_API}/misiones`);
-    if (!response.ok) {
+    if (!missions) return;
+    try {
+        const response = await fetch(`${AUTH_API}/misiones`);
+        if (!response.ok) {
+            missions.innerHTML = '<p class="muted">No se han podido cargar las misiones.</p>';
+            return;
+        }
+        missionList = await response.json();
+        renderMissions();
+    } catch {
         missions.innerHTML = '<p class="muted">No se han podido cargar las misiones.</p>';
-        return;
     }
-
-    missionList = await response.json();
-    renderMissions();
 }
 
 // ─── Tienda ───────────────────────────────────────────────────────────────────
@@ -330,7 +329,6 @@ async function loadProducts() {
         products.innerHTML = '<p class="muted">No se han podido cargar los productos.</p>';
         return;
     }
-
     shopProducts = await response.json();
     renderProducts();
 }
@@ -372,15 +370,11 @@ function getRequiredMission(product) {
 }
 
 function renderRanking() {
-    if (!ranking) {
-        return;
-    }
-
+    if (!ranking) return;
     if (!currentUser) {
         ranking.innerHTML = '<p class="muted">Inicia sesion para ver el ranking.</p>';
         return;
     }
-
     if (!rankingPlayers.length) {
         ranking.innerHTML = '<p class="muted">Todavia no hay jugadores en el ranking.</p>';
         return;
@@ -408,15 +402,11 @@ function renderRanking() {
 }
 
 function renderMissions() {
-    if (!missions) {
-        return;
-    }
-
+    if (!missions) return;
     if (!currentUser) {
         missions.innerHTML = '<p class="muted">Las misiones apareceran al iniciar sesion.</p>';
         return;
     }
-
     if (!missionList.length) {
         missions.innerHTML = '<p class="muted">No hay misiones configuradas todavia.</p>';
         return;
@@ -457,9 +447,7 @@ function renderMissions() {
 }
 
 function renderInventory() {
-    if (!inventory) {
-        return;
-    }
+    if (!inventory) return;
 
     const items = currentUser?.inventario || [];
     if (!items.length) {
@@ -492,18 +480,12 @@ async function deleteInventoryProduct(productId) {
         setMessage("Inicia sesion para eliminar objetos.", "error");
         return;
     }
-
     setMessage("Eliminando objeto del inventario...", "");
-
     try {
         const response = await fetch(`${SHOP_API}/inventario/${encodeURIComponent(productId)}/${encodeURIComponent(currentUser.id)}`, {
             method: "DELETE"
         });
-
-        if (!response.ok) {
-            throw new Error(String(response.status));
-        }
-
+        if (!response.ok) throw new Error(String(response.status));
         await refreshCurrentUser();
         userInfo.textContent = `${currentUser.nombre} - ${currentUser.ects} ECTS`;
         renderProducts();
@@ -515,7 +497,6 @@ async function deleteInventoryProduct(productId) {
             setMessage("Ese objeto ya no esta en tu inventario.", "error");
             return;
         }
-
         setMessage("No se ha podido eliminar el objeto.", "error");
     }
 }
@@ -525,27 +506,20 @@ async function buyProduct(productId) {
         setMessage("Inicia sesion para comprar objetos.", "error");
         return;
     }
-
     setMessage("Procesando compra en la tienda SIGMA...", "");
-
     try {
         await refreshCurrentUser();
-
         const response = await fetch(`${SHOP_API}/comprar/${encodeURIComponent(productId)}/${encodeURIComponent(currentUser.id)}`, {
             method: "POST"
         });
-
-        if (!response.ok) {
-            throw new Error(String(response.status));
-        }
-
+        if (!response.ok) throw new Error(String(response.status));
         await refreshCurrentUser();
         userInfo.textContent = `${currentUser.nombre} - ${currentUser.ects} ECTS`;
         renderAvatarState();
         renderGameState();
         renderProducts();
-        await loadRanking();
-        await loadMissions();
+        rankingPlayers = [];
+        missionList = [];
         renderInventory();
         setMessage("Objeto adquirido. Inventario sincronizado.", "ok");
     } catch (error) {
@@ -554,7 +528,6 @@ async function buyProduct(productId) {
             setMessage("Sesion caducada. Inicia sesion o registrate de nuevo.", "error");
             return;
         }
-
         setMessage(error.message === "402" ? "No tienes suficientes ECTS para este objeto." : "No se ha podido completar la compra.", "error");
     }
 }
@@ -568,27 +541,34 @@ async function renderSession() {
         renderAvatarState();
         renderGameState();
         products.innerHTML = '<p class="muted">Los productos apareceran al iniciar sesion.</p>';
-        renderRanking();
-        renderMissions();
+        ranking.innerHTML = '<p class="muted">Inicia sesion para ver el ranking.</p>';
+        missions.innerHTML = '<p class="muted">Las misiones apareceran al iniciar sesion.</p>';
         renderInventory();
+        setTab("shop");
         return;
     }
 
+    // Refrescar usuario — si falla, limpiar sesión
     try {
         await refreshCurrentUser();
-        renderShellState();
-        userInfo.textContent = `${currentUser.nombre} - ${currentUser.ects} ECTS`;
-        renderAvatarState();
-        renderGameState();
-        logoutButton.classList.remove("hidden");
-        await loadProducts();
-        await loadRanking();
-        await loadMissions();
-        renderInventory();
-    } catch (error) {
+    } catch {
         clearSession("Los productos apareceran al iniciar sesion.");
-        setMessage("", "");
+        return;
     }
+
+    renderShellState();
+    userInfo.textContent = `${currentUser.nombre} - ${currentUser.ects} ECTS`;
+    renderAvatarState();
+    renderGameState();
+    logoutButton.classList.remove("hidden");
+    setTab("shop");
+
+    // Cargar tienda, ranking y misiones de forma independiente
+    // para que un fallo en uno no rompa los demás
+    await loadProducts();
+    renderInventory();
+    await loadRanking();
+    await loadMissions();
 }
 
 // ─── Formularios ──────────────────────────────────────────────────────────────
@@ -601,16 +581,15 @@ loginForm.addEventListener("submit", async event => {
     const password = document.getElementById("loginPassword").value;
 
     try {
-        // Si lo que escribió tiene formato email, usar el endpoint login-by-email
         currentUser = await authRequest("/login", isValidEmail(loginId)
-            ? { email: loginId.toLowerCase(), password: password }
-            : { id: loginId, password: password });
+            ? { email: loginId.toLowerCase(), password }
+            : { id: loginId, password });
 
         localStorage.setItem("currentUser", JSON.stringify(currentUser));
         loginForm.reset();
         setMessage("Sesion iniciada correctamente.", "ok");
         await renderSession();
-    } catch (error) {
+    } catch {
         setMessage("Usuario, correo o contrasena incorrectos.", "error");
     }
 });
@@ -622,14 +601,12 @@ registerForm.addEventListener("submit", async event => {
     const password = registerPassword.value;
     const confirm  = confirmRegisterPassword.value;
 
-    // 1. Validar email
     if (!isValidEmail(email)) {
         emailError.classList.remove("hidden");
         setMessage("Introduce un correo electronico valido.", "error");
         return;
     }
 
-    // 2. Validar robustez de contraseña
     const missing = pwMissing(password);
     if (missing.length > 0) {
         updatePasswordHelp();
@@ -637,7 +614,6 @@ registerForm.addEventListener("submit", async event => {
         return;
     }
 
-    // 3. Validar que las contraseñas coincidan
     if (password !== confirm) {
         confirmError.classList.remove("hidden");
         setMessage("Las contrasenas no coinciden.", "error");
@@ -650,8 +626,8 @@ registerForm.addEventListener("submit", async event => {
         currentUser = await authRequest("/register", {
             id:       document.getElementById("registerId").value.trim(),
             nombre:   document.getElementById("registerName").value.trim(),
-            email:    email,
-            password: password,
+            email,
+            password,
             avatar:   registerAvatar.value
         });
         localStorage.setItem("currentUser", JSON.stringify(currentUser));
@@ -664,15 +640,12 @@ registerForm.addEventListener("submit", async event => {
         await renderSession();
     } catch (error) {
         if (error.message === "409") {
-            if (error.detail.includes("EMAIL_EXISTS")) {
-                setMessage("Ese correo electronico ya esta registrado.", "error");
-            } else {
-                setMessage("Ese nombre de usuario ya existe.", "error");
-            }
-        } else if (error.message === "400" && error.detail.includes("WEAK_PASSWORD")) {
-            const missingFromServer = backendPasswordMissing(error.detail);
-            setMessage("Contrasena insegura. Falta: " + missingFromServer.join(", ") + ".", "error");
-        } else if (error.message === "400" && error.detail.includes("INVALID_EMAIL")) {
+            setMessage(error.detail?.includes("EMAIL_EXISTS")
+                ? "Ese correo electronico ya esta registrado."
+                : "Ese nombre de usuario ya existe.", "error");
+        } else if (error.message === "400" && error.detail?.includes("WEAK_PASSWORD")) {
+            setMessage("Contrasena insegura. Falta: " + backendPasswordMissing(error.detail).join(", ") + ".", "error");
+        } else if (error.message === "400" && error.detail?.includes("INVALID_EMAIL")) {
             setMessage("Introduce un correo electronico valido.", "error");
         } else if (error.message === "400") {
             setMessage("Rellena usuario, correo y contrasena.", "error");
@@ -693,42 +666,28 @@ logoutButton.addEventListener("click", () => {
 
 products.addEventListener("click", event => {
     const button = event.target.closest("button[data-product-id]");
-    if (!button) {
-        return;
-    }
-
-    buyProduct(button.dataset.productId);
+    if (button) buyProduct(button.dataset.productId);
 });
 
 inventory?.addEventListener("click", event => {
     const button = event.target.closest("button[data-inventory-product-id]");
-    if (!button) {
-        return;
-    }
-
-    deleteInventoryProduct(button.dataset.inventoryProductId);
+    if (button) deleteInventoryProduct(button.dataset.inventoryProductId);
 });
 
 registerAvatarPicker?.addEventListener("click", event => {
     const button = event.target.closest(".avatar-option");
-    if (!button) {
-        return;
-    }
-
+    if (!button) return;
     registerAvatar.value = cleanAvatar(button.dataset.avatar);
     markSelectedAvatar(registerAvatarPicker, registerAvatar.value);
 });
 
 sessionAvatarPicker?.addEventListener("click", async event => {
     const button = event.target.closest(".avatar-option");
-    if (!button) {
-        return;
-    }
-
+    if (!button) return;
     try {
         await updateAvatar(button.dataset.avatar);
         setMessage("Avatar actualizado.", "ok");
-    } catch (error) {
+    } catch {
         setMessage("No se ha podido actualizar el avatar.", "error");
     }
 });

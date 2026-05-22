@@ -504,3 +504,21 @@ body.session-active .mission-panel {
         grid-template-columns: repeat(2, 1fr);
     }
 }
+.main-tabs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 18px;
+}
+
+.tab-btn {
+    padding: 10px;
+    font-size: 13px;
+}
+
+.tab-btn.active {
+    background: linear-gradient(135deg, rgba(69, 230, 255, 0.96), rgba(85, 255, 153, 0.82));
+    color: #031016;
+    border-color: var(--line-strong);
+}
+

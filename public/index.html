@@ -112,15 +112,15 @@
         <p id="message" class="message" aria-live="polite"></p>
     </section>
 
-    <!-- SECCIÓN DE TIENDA E INVENTARIO -->
+    <!-- SECCIÓN PRINCIPAL -->
     <section class="mission-panel" aria-labelledby="shopTitle">
         <div class="user-bar">
             <div class="user-summary">
                 <img id="currentAvatarImage" class="current-avatar hidden" src="img/avatars/avatar_1.png" alt="Avatar actual">
                 <div>
-                <h2 id="shopTitle">Tienda SIGMA</h2>
-                <p id="userInfo" class="muted">Inicia sesión para ver tu saldo.</p>
-                <div id="gameStateInfo" class="game-state-info hidden"></div>
+                    <h2 id="shopTitle">Tienda SIGMA</h2>
+                    <p id="userInfo" class="muted">Inicia sesión para ver tu saldo.</p>
+                    <div id="gameStateInfo" class="game-state-info hidden"></div>
                 </div>
             </div>
             <div id="sessionAvatarPanel" class="session-avatar-panel hidden" aria-label="Cambiar avatar">
@@ -143,46 +143,61 @@
             <button id="logoutButton" class="secondary hidden" type="button">Salir</button>
         </div>
 
-        <div class="intel-strip" aria-hidden="true">
-            <span>Misiones</span>
-            <span>Profesores</span>
-            <span>Terminales</span>
-            <span>ECTS</span>
+        <!-- PESTAÑAS DE NAVEGACIÓN (solo visibles con sesión) -->
+        <div id="mainTabs" class="main-tabs hidden" aria-label="Secciones">
+            <button id="tabShop"    class="tab-btn active"    type="button">Tienda</button>
+            <button id="tabRanking" class="tab-btn secondary" type="button">Ranking</button>
+            <button id="tabMissions" class="tab-btn secondary" type="button">Misiones</button>
         </div>
 
-        <div id="products" class="products">
-            <p class="muted">Los productos aparecerán al iniciar sesión.</p>
+        <!-- VISTA: TIENDA -->
+        <div id="viewShop">
+            <div class="intel-strip" aria-hidden="true">
+                <span>Misiones</span>
+                <span>Profesores</span>
+                <span>Terminales</span>
+                <span>ECTS</span>
+            </div>
+            <div id="products" class="products">
+                <p class="muted">Los productos aparecerán al iniciar sesión.</p>
+            </div>
+            <aside class="inventory-panel" aria-labelledby="inventoryTitle">
+                <div>
+                    <p class="eyebrow">Objetos recuperados</p>
+                    <h3 id="inventoryTitle">Inventario</h3>
+                </div>
+                <div id="inventory" class="inventory-list">
+                    <p class="muted">Aún no hay objetos sincronizados.</p>
+                </div>
+            </aside>
         </div>
 
-        <section class="data-panel" aria-labelledby="rankingTitle">
-            <div>
-                <p class="eyebrow">Progreso global</p>
-                <h3 id="rankingTitle">Ranking de jugadores</h3>
+        <!-- VISTA: RANKING -->
+        <div id="viewRanking" class="hidden">
+            <div class="data-panel" aria-labelledby="rankingTitle">
+                <div>
+                    <p class="eyebrow">Progreso global</p>
+                    <h3 id="rankingTitle">Ranking de jugadores</h3>
+                </div>
+                <div id="ranking" class="ranking-list">
+                    <p class="muted">Inicia sesión para ver el ranking.</p>
+                </div>
             </div>
-            <div id="ranking" class="ranking-list">
-                <p class="muted">Inicia sesión para ver el ranking.</p>
-            </div>
-        </section>
+        </div>
 
-        <section class="data-panel" aria-labelledby="missionsTitle">
-            <div>
-                <p class="eyebrow">Operaciones SIGMA</p>
-                <h3 id="missionsTitle">Misiones</h3>
+        <!-- VISTA: MISIONES -->
+        <div id="viewMissions" class="hidden">
+            <div class="data-panel" aria-labelledby="missionsTitle">
+                <div>
+                    <p class="eyebrow">Operaciones SIGMA</p>
+                    <h3 id="missionsTitle">Misiones</h3>
+                </div>
+                <div id="missions" class="missions-list">
+                    <p class="muted">Las misiones aparecerán al iniciar sesión.</p>
+                </div>
             </div>
-            <div id="missions" class="missions-list">
-                <p class="muted">Las misiones aparecerán al iniciar sesión.</p>
-            </div>
-        </section>
+        </div>
 
-        <aside class="inventory-panel" aria-labelledby="inventoryTitle">
-            <div>
-                <p class="eyebrow">Objetos recuperados</p>
-                <h3 id="inventoryTitle">Inventario</h3>
-            </div>
-            <div id="inventory" class="inventory-list">
-                <p class="muted">Aún no hay objetos sincronizados.</p>
-            </div>
-        </aside>
     </section>
 </main>
 
