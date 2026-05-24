@@ -65,6 +65,12 @@ public class ProductoServicio
             }
 
             List<Producto> inventario = user.getInventario();
+            
+            // CAMBIO CRÍTICO: Evita NullPointerException si el inventario está vacío en la BD
+            if (inventario == null) {
+                inventario = new java.util.ArrayList<Producto>();
+            }
+
             GenericEntity<List<Producto>> entity = new GenericEntity<List<Producto>>(inventario) {};
             return Response.ok(entity).build();
         } catch (Exception e) {
