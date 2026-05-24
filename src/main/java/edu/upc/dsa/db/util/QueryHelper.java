@@ -1,5 +1,4 @@
 package edu.upc.dsa.db.util;
-
 import edu.upc.dsa.models.Producto;
 import edu.upc.dsa.models.Mission;
 import edu.upc.dsa.models.Objective;

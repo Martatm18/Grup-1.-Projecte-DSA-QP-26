@@ -5,7 +5,6 @@ import edu.upc.dsa.models.Mission;
 import edu.upc.dsa.models.Objective;
 import edu.upc.dsa.models.User;
 import edu.upc.dsa.models.UserGameState;
-
 import java.sql.*;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;

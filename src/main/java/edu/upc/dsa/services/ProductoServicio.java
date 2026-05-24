@@ -5,6 +5,10 @@ import edu.upc.dsa.ProductoManagerImpl;
 import edu.upc.dsa.models.ApiError;
 import edu.upc.dsa.models.Producto;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.apache.log4j.Logger;
 import javax.ws.rs.*;
 import javax.ws.rs.core.GenericEntity;
@@ -36,6 +40,76 @@ public class ProductoServicio
             return Response.ok(entity).build();
         } catch (Exception e) {
             logger.error("Shop products error", e);
+            return serverError();
+        }
+    }
+
+    @GET
+    @Path("/inventario/{idUser}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Inventario conseguido", response = Producto.class, responseContainer = "List"),
+            @ApiResponse(code = 404, message = "User Not Found")
+    })
+    public Response getInventario(
+            @ApiParam(value = "ID del usuario", required = true) @PathParam("idUser") String idUser)
+    {
+        try {
+            if (idUser == null || idUser.trim().isEmpty()) {
+                return error(Response.Status.BAD_REQUEST, "INVALID_USER_ID", "Identificador obligatorio.");
+            }
+
+            edu.upc.dsa.models.User user = pm.getUser(idUser.trim());
+            if (user == null) {
+                return error(Response.Status.NOT_FOUND, "USER_NOT_FOUND", "Usuario no encontrado.");
+            }
+
+            List<Producto> inventario = user.getInventario();
+            GenericEntity<List<Producto>> entity = new GenericEntity<List<Producto>>(inventario) {};
+            return Response.ok(entity).build();
+        } catch (Exception e) {
+            logger.error("Get inventory error", e);
+            return serverError();
+        }
+    }
+
+    @GET
+    @Path("/inventario/{idUser}/producto/{idProd}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Producto de inventario recuperado", response = Producto.class, responseContainer = "List"),
+            @ApiResponse(code = 404, message = "Usuario o producto no encontrado")
+    })
+    public Response getInventarioProducto(
+            @ApiParam(value = "ID del usuario", required = true) @PathParam("idUser") String idUser,
+            @ApiParam(value = "ID del producto", required = true) @PathParam("idProd") String idProd)
+    {
+        try {
+            if (idUser == null || idUser.trim().isEmpty() || idProd == null || idProd.trim().isEmpty()) {
+                return error(Response.Status.BAD_REQUEST, "INVALID_REQUEST", "ID de usuario y producto son obligatorios.");
+            }
+
+            edu.upc.dsa.models.User user = pm.getUser(idUser.trim());
+            if (user == null) {
+                return error(Response.Status.NOT_FOUND, "USER_NOT_FOUND", "Usuario no encontrado.");
+            }
+
+            List<Producto> inventario = user.getInventario();
+            List<Producto> items = new java.util.ArrayList<>();
+            for (Producto producto : inventario) {
+                if (String.valueOf(producto.getId()).equals(idProd.trim())) {
+                    items.add(producto);
+                }
+            }
+
+            if (items.isEmpty()) {
+                return error(Response.Status.NOT_FOUND, "INVENTORY_PRODUCT_NOT_FOUND", "Producto no encontrado en el inventario.");
+            }
+
+            GenericEntity<List<Producto>> entity = new GenericEntity<List<Producto>>(items) {};
+            return Response.ok(entity).build();
+        } catch (Exception e) {
+            logger.error("Get inventory product error", e);
             return serverError();
         }
     }
