@@ -93,7 +93,6 @@ public class ProductoDAO {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-
         return inventario;
     }
 

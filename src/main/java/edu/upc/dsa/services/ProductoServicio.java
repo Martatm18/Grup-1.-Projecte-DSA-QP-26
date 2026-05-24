@@ -59,14 +59,15 @@ public class ProductoServicio
                 return error(Response.Status.BAD_REQUEST, "INVALID_USER_ID", "Identificador obligatorio.");
             }
 
+            // 1. Buscamos el usuario utilizando el ID que manda Android
             edu.upc.dsa.models.User user = pm.getUser(idUser.trim());
             if (user == null) {
                 return error(Response.Status.NOT_FOUND, "USER_NOT_FOUND", "Usuario no encontrado.");
             }
 
             List<Producto> inventario = user.getInventario();
-            
-            // CAMBIO CRÍTICO: Evita NullPointerException si el inventario está vacío en la BD
+
+            // Si el inventario viene null, evitamos que rompa el GenericEntity pasándolo a lista vacía
             if (inventario == null) {
                 inventario = new java.util.ArrayList<Producto>();
             }
@@ -79,46 +80,7 @@ public class ProductoServicio
         }
     }
 
-    @GET
-    @Path("/inventario/{idUser}/producto/{idProd}")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "Producto de inventario recuperado", response = Producto.class, responseContainer = "List"),
-            @ApiResponse(code = 404, message = "Usuario o producto no encontrado")
-    })
-    public Response getInventarioProducto(
-            @ApiParam(value = "ID del usuario", required = true) @PathParam("idUser") String idUser,
-            @ApiParam(value = "ID del producto", required = true) @PathParam("idProd") String idProd)
-    {
-        try {
-            if (idUser == null || idUser.trim().isEmpty() || idProd == null || idProd.trim().isEmpty()) {
-                return error(Response.Status.BAD_REQUEST, "INVALID_REQUEST", "ID de usuario y producto son obligatorios.");
-            }
 
-            edu.upc.dsa.models.User user = pm.getUser(idUser.trim());
-            if (user == null) {
-                return error(Response.Status.NOT_FOUND, "USER_NOT_FOUND", "Usuario no encontrado.");
-            }
-
-            List<Producto> inventario = user.getInventario();
-            List<Producto> items = new java.util.ArrayList<>();
-            for (Producto producto : inventario) {
-                if (String.valueOf(producto.getId()).equals(idProd.trim())) {
-                    items.add(producto);
-                }
-            }
-
-            if (items.isEmpty()) {
-                return error(Response.Status.NOT_FOUND, "INVENTORY_PRODUCT_NOT_FOUND", "Producto no encontrado en el inventario.");
-            }
-
-            GenericEntity<List<Producto>> entity = new GenericEntity<List<Producto>>(items) {};
-            return Response.ok(entity).build();
-        } catch (Exception e) {
-            logger.error("Get inventory product error", e);
-            return serverError();
-        }
-    }
 
     @POST
     @Path("/comprar/{idProd}/{idUser}")
