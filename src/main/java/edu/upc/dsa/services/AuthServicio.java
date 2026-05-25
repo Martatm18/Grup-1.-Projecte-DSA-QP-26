@@ -8,6 +8,7 @@ import edu.upc.dsa.models.ApiError;
 import edu.upc.dsa.models.AuthRequest;
 import edu.upc.dsa.models.Mission;
 import edu.upc.dsa.models.User;
+import edu.upc.dsa.models.ECTS;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
@@ -226,11 +227,8 @@ public class AuthServicio
                 return error(Response.Status.NOT_FOUND, "USER_NOT_FOUND", "Usuario no encontrado.");
             }
 
-            java.util.Map<String, Object> payload = new java.util.HashMap<>();
-            payload.put("idUser", user.getId());
-            payload.put("ects", user.getEcts());
-
-            return Response.ok(payload).build();
+            ECTS response = new ECTS(user.getId(), user.getEcts());
+            return Response.ok(response).build();
         } catch (Exception e) {
             logger.error("Get user ECTS error - Exception type: " + e.getClass().getName() + " - Message: " + e.getMessage(), e);
             e.printStackTrace();
