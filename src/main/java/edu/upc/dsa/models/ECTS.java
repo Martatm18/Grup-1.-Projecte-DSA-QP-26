@@ -3,13 +3,13 @@ package edu.upc.dsa.models;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class ECTSResponse {
+public class ECTS {
     private String idUser;
     private int ects;
 
-    public ECTSResponse() {}
+    public ECTS() {}
 
-    public ECTSResponse(String idUser, int ects) {
+    public ECTS(String idUser, int ects) {
         this.idUser = idUser;
         this.ects = ects;
     }
