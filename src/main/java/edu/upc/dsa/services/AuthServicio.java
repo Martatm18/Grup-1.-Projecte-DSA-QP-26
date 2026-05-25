@@ -232,7 +232,8 @@ public class AuthServicio
 
             return Response.ok(payload).build();
         } catch (Exception e) {
-            logger.error("Get user ECTS error", e);
+            logger.error("Get user ECTS error - Exception type: " + e.getClass().getName() + " - Message: " + e.getMessage(), e);
+            e.printStackTrace();
             return serverError();
         }
     }

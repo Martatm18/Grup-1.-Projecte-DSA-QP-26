@@ -114,7 +114,12 @@ public class UserDAO {
 
         try {
             session = FactorySession.openSession();
-            return (User) session.get(User.class, username);
+            User user = (User) session.get(User.class, username);
+            return user;
+        } catch (Exception e) {
+            System.err.println("Error in UserDAO.getUser: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Database error fetching user: " + e.getMessage(), e);
         } finally {
             if (session != null) {
                 session.close();
