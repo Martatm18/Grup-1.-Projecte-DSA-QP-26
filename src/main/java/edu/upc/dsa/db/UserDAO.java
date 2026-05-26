@@ -7,11 +7,6 @@ import edu.upc.dsa.db.util.Session;
 
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
 
 public class UserDAO {
     public static final int USERNAME_EXISTS = 409;
@@ -114,7 +109,7 @@ public class UserDAO {
 
         try {
             session = FactorySession.openSession();
-            return (User) session.get(User.class, username);
+            return session.get(User.class, username);
         } finally {
             if (session != null) {
                 session.close();
@@ -123,69 +118,39 @@ public class UserDAO {
     }
 
     public int updateAvatar(String username, String avatar) {
-        String sql = "UPDATE users SET avatar=? WHERE username=?";
+        Session session = null;
 
-        try (Connection conn = DBUtils.getConnection();
-             PreparedStatement pstm = conn.prepareStatement(sql)) {
+        try {
+            session = FactorySession.openSession();
+            User user = session.get(User.class, "username", username);
 
-            pstm.setString(1, avatar);
-            pstm.setString(2, username);
+            if (user == null) {
+                return 404;
+            }
 
-            int updatedRows = pstm.executeUpdate();
-            return updatedRows == 0 ? 404 : 204;
-        } catch (SQLException e) {
+            user.setAvatar(avatar);
+            session.update(user);
+            return 204;
+        } catch (Exception e) {
             e.printStackTrace();
             return 500;
+        } finally {
+            if (session != null) {
+                session.close();
+            }
         }
     }
 
     public List<User> getRanking() {
-        List<User> ranking = new ArrayList<>();
-        String sql = "SELECT u.username, u.name, u.email, u.password, u.ects, u.avatar, " +
-                "g.health, g.max_health, g.current_mission_id, g.current_objetive_id, " +
-                "m.title AS mission_title, o.title AS objective_title " +
-                "FROM users u " +
-                "LEFT JOIN user_game_state g ON g.username = u.username " +
-                "LEFT JOIN missions m ON m.id = g.current_mission_id " +
-                "LEFT JOIN objectives o ON o.id = g.current_objetive_id " +
-                "ORDER BY COALESCE(g.current_mission_id, 0) DESC, " +
-                "COALESCE(g.current_objetive_id, 0) DESC, u.ects DESC, u.username ASC";
+        Session session = null;
 
-        try (Connection conn = DBUtils.getConnection();
-             PreparedStatement pstm = conn.prepareStatement(sql);
-             ResultSet rs = pstm.executeQuery()) {
-
-            while (rs.next()) {
-                User user = buildUser(rs);
-                UserGameState gameState = new UserGameState();
-                gameState.setUsername(user.getId());
-                gameState.setHealth(rs.getInt("health"));
-                gameState.setMaxHealth(rs.getInt("max_health"));
-                gameState.setCurrentMissionId(rs.getObject("current_mission_id") == null ? null : rs.getInt("current_mission_id"));
-                gameState.setCurrentObjectiveId(rs.getObject("current_objetive_id") == null ? null : rs.getInt("current_objetive_id"));
-                gameState.setCurrentMissionTitle(rs.getString("mission_title"));
-                gameState.setCurrentObjectiveTitle(rs.getString("objective_title"));
-                user.setGameState(gameState);
-                ranking.add(user);
+        try {
+            session = FactorySession.openSession();
+            return session.getRanking();
+        } finally {
+            if (session != null) {
+                session.close();
             }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
         }
-
-        return ranking;
-    }
-
-    private User buildUser(ResultSet rs) throws SQLException {
-        User user = new User(
-                rs.getString("username"),
-                rs.getString("name"),
-                rs.getString("password")
-        );
-
-        user.setEmail(rs.getString("email"));
-        user.setEcts(rs.getInt("ects"));
-        user.setAvatar(rs.getString("avatar"));
-
-        return user;
     }
 }

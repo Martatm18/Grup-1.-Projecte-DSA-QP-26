@@ -8,10 +8,6 @@ import edu.upc.dsa.models.User;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 public class ProductoDAO {
 
@@ -40,7 +36,7 @@ public class ProductoDAO {
 
         try {
             session = FactorySession.openSession();
-            return (Producto) session.get(Producto.class, idProducto);
+            return session.get(Producto.class, idProducto);
         } finally {
             if (session != null) {
                 session.close();
@@ -63,91 +59,42 @@ public class ProductoDAO {
     }
 
     public List<Producto> getInventario(String username) {
-        List<Producto> inventario = new LinkedList<>();
+        Session session = null;
 
-        String sql = "SELECT s.id, s.name, s.description, s.price, i.quantity " +
-                "FROM inventory i " +
-                "INNER JOIN shop s ON s.id = i.product_id " +
-                "WHERE i.username=?";
-
-        try (Connection conn = DBUtils.getConnection();
-             PreparedStatement pstm = conn.prepareStatement(sql)) {
-
-            pstm.setString(1, username);
-
-            try (ResultSet rs = pstm.executeQuery()) {
-                while (rs.next()) {
-                    Producto producto = new Producto(
-                            rs.getInt("id"),
-                            rs.getString("name"),
-                            rs.getString("description"),
-                            rs.getInt("price")
-                    );
-
-                    int quantity = rs.getInt("quantity");
-                    for (int i = 0; i < quantity; i++) {
-                        inventario.add(producto);
-                    }
-                }
+        try {
+            session = FactorySession.openSession();
+            return session.getInventory(username);
+        } finally {
+            if (session != null) {
+                session.close();
             }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
         }
-
-        return inventario;
     }
 
     public int eliminarProductoInventario(String username, Integer productId, int precio) {
-        String selectSql = "SELECT quantity FROM inventory WHERE username=? AND product_id=?";
-        String updateSql = "UPDATE inventory SET quantity=quantity-1 WHERE username=? AND product_id=?";
-        String deleteSql = "DELETE FROM inventory WHERE username=? AND product_id=?";
-        String refundSql = "UPDATE users SET ects=ects+? WHERE username=?";
+        Session session = null;
 
-        try (Connection conn = DBUtils.getConnection()) {
+        try {
+            session = FactorySession.openSession();
 
-            int quantity = 0;
-
-            try (PreparedStatement pstm = conn.prepareStatement(selectSql)) {
-                pstm.setString(1, username);
-                pstm.setInt(2, productId);
-
-                try (ResultSet rs = pstm.executeQuery()) {
-                    if (rs.next()) {
-                        quantity = rs.getInt("quantity");
-                    }
-                }
-            }
-
-            if (quantity == 0) {
+            if (!session.removeProductFromInventory(username, productId)) {
                 return 404;
             }
 
-            if (quantity == 1) {
-                try (PreparedStatement pstm = conn.prepareStatement(deleteSql)) {
-                    pstm.setString(1, username);
-                    pstm.setInt(2, productId);
-                    pstm.executeUpdate();
-                }
-            } else {
-                try (PreparedStatement pstm = conn.prepareStatement(updateSql)) {
-                    pstm.setString(1, username);
-                    pstm.setInt(2, productId);
-                    pstm.executeUpdate();
-                }
-            }
-
-            // Devolver el precio al usuario
-            try (PreparedStatement pstm = conn.prepareStatement(refundSql)) {
-                pstm.setInt(1, precio);
-                pstm.setString(2, username);
-                pstm.executeUpdate();
+            User user = session.get(User.class, "username", username);
+            if (user != null) {
+                user.addEcts(precio);
+                session.update(user);
             }
 
             return 204;
-
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return 500;
+        } finally {
+            if (session != null) {
+                session.close();
+            }
         }
     }
 }
