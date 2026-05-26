@@ -27,7 +27,10 @@
 .idea/**
 .idea/**/gradle.xml
 .idea/**/libraries
-target
+target/
+
+# VS Code user settings
+.vscode/
 
 # Database dumps
 *.sql
