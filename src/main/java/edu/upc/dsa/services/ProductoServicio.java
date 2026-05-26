@@ -5,6 +5,10 @@ import edu.upc.dsa.ProductoManagerImpl;
 import edu.upc.dsa.models.ApiError;
 import edu.upc.dsa.models.Producto;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.apache.log4j.Logger;
 import javax.ws.rs.*;
 import javax.ws.rs.core.GenericEntity;
@@ -39,6 +43,44 @@ public class ProductoServicio
             return serverError();
         }
     }
+
+    @GET
+    @Path("/inventario/{idUser}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Inventario conseguido", response = Producto.class, responseContainer = "List"),
+            @ApiResponse(code = 404, message = "User Not Found")
+    })
+    public Response getInventario(
+            @ApiParam(value = "ID del usuario", required = true) @PathParam("idUser") String idUser)
+    {
+        try {
+            if (idUser == null || idUser.trim().isEmpty()) {
+                return error(Response.Status.BAD_REQUEST, "INVALID_USER_ID", "Identificador obligatorio.");
+            }
+
+            // 1. Buscamos el usuario utilizando el ID que manda Android
+            edu.upc.dsa.models.User user = pm.getUser(idUser.trim());
+            if (user == null) {
+                return error(Response.Status.NOT_FOUND, "USER_NOT_FOUND", "Usuario no encontrado.");
+            }
+
+            List<Producto> inventario = user.getInventario();
+
+            // Si el inventario viene null, evitamos que rompa el GenericEntity pasándolo a lista vacía
+            if (inventario == null) {
+                inventario = new java.util.ArrayList<Producto>();
+            }
+
+            GenericEntity<List<Producto>> entity = new GenericEntity<List<Producto>>(inventario) {};
+            return Response.ok(entity).build();
+        } catch (Exception e) {
+            logger.error("Get inventory error", e);
+            return serverError();
+        }
+    }
+
+
 
     @POST
     @Path("/comprar/{idProd}/{idUser}")

@@ -340,16 +340,12 @@ function renderProducts() {
     }
 
     products.innerHTML = shopProducts.map(product => {
-        const requiredMission = getRequiredMission(product);
-        const currentMission = currentUser?.gameState?.currentMissionId ?? 1;
-        const isLocked = currentUser && requiredMission > currentMission;
-        const canBuy = currentUser && !isLocked && currentUser.ects >= product.precio;
-        const buttonText = isLocked ? "Bloqueado" : (canBuy ? "Comprar" : "ECTS insuficientes");
-        const lockText = isLocked ? `<span class="lock-badge">Mision ${escapeHtml(requiredMission)}</span>` : "";
+        const canBuy = currentUser && currentUser.ects >= product.precio;
+        const buttonText = canBuy ? "Comprar" : "ECTS insuficientes";
 
         return `
-            <article class="product ${isLocked ? "locked" : ""}">
-                <div class="product-code">OBJ-${escapeHtml(product.id)}${lockText}</div>
+            <article class="product">
+                <div class="product-code">OBJ-${escapeHtml(product.id)}</div>
                 <h3>${escapeHtml(product.nombre)}</h3>
                 <p>${escapeHtml(product.descripcion)}</p>
                 <div class="product-actions">
@@ -358,16 +354,11 @@ function renderProducts() {
                         ${buttonText}
                     </button>
                 </div>
-            </article>
+            </article> 
         `;
     }).join("");
 }
 
-function getRequiredMission(product) {
-    const explicitValue = product.requiredMissionId ?? product.missionId ?? product.unlockMissionId;
-    const numericValue = Number(explicitValue ?? product.id ?? 1);
-    return Number.isFinite(numericValue) && numericValue > 0 ? numericValue : 1;
-}
 
 function renderRanking() {
     if (!ranking) return;

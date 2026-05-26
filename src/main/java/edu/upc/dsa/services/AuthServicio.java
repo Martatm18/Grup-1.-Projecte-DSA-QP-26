@@ -8,7 +8,11 @@ import edu.upc.dsa.models.ApiError;
 import edu.upc.dsa.models.AuthRequest;
 import edu.upc.dsa.models.Mission;
 import edu.upc.dsa.models.User;
+import edu.upc.dsa.models.ECTS;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.apache.log4j.Logger;
 
 import javax.ws.rs.*;
@@ -198,6 +202,36 @@ public class AuthServicio
             return Response.ok(user).build();
         } catch (Exception e) {
             logger.error("Get user error", e);
+            return serverError();
+        }
+    }
+
+    @GET
+    @Path("/usuarios/{idUser}/ects")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "ECTS recuperados"),
+            @ApiResponse(code = 404, message = "Usuario no encontrado")
+    })
+    public Response getUserEcts(
+            @ApiParam(value = "ID del usuario", required = true) @PathParam("idUser") String idUser)
+    {
+        try {
+            if (isBlank(idUser)) {
+                return badRequest("MISSING_USER", "Falta el identificador de usuario.");
+            }
+
+            User user = pm.getUser(idUser.trim());
+            if (user == null)
+            {
+                return error(Response.Status.NOT_FOUND, "USER_NOT_FOUND", "Usuario no encontrado.");
+            }
+
+            ECTS response = new ECTS(user.getId(), user.getEcts());
+            return Response.ok(response).build();
+        } catch (Exception e) {
+            logger.error("Get user ECTS error - Exception type: " + e.getClass().getName() + " - Message: " + e.getMessage(), e);
+            e.printStackTrace();
             return serverError();
         }
     }
