@@ -45,17 +45,29 @@ Thumbs.db
 *.class
 *.log
 logs/
+hs_err_pid*
+replay_pid*
 
 # Local config / secrets
 .env
 *.env
 application-local.properties
 db.properties
+local.properties
 
 # Temporary files
 *.tmp
 *.temp
 ~$*
+
+# IDE metadata sometimes generated outside .idea
+.classpath
+.project
+.settings/
+.factorypath
+
+# Maven generated helper files
+dependency-reduced-pom.xml
 
 # Gradle and Maven with auto-import
 # When using Gradle or Maven with auto-import, you should exclude module files,
