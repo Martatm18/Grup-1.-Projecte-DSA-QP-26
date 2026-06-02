@@ -33,11 +33,12 @@ public class UserServicio
         System.out.println("EJ2 - GET /user/" + idUser + "/team");
 
         List<TeamMember> members = Arrays.asList(
-                new TeamMember("Juan", "https://cdn.pixabay.com/photo/2017/07/11/15/51/kermit-2493979_1280.png", 250),
-                new TeamMember("Palomo", "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png", 200),
-                new TeamMember("Marti", "https://cdn.pixabay.com/photo/2016/11/14/17/39/person-1824144_960_720.png", 180)
+                new TeamMember("Marta", "avatar_3", 250),
+                new TeamMember("Carla", "avatar_4", 200),
+                new TeamMember("Marti", "avatar_2", 380),
+                new TeamMember("Hector", "avatar_5", 180)
         );
 
-        return Response.ok(new TeamResponse("porxinos", members)).build();
+        return Response.ok(new TeamResponse("Grup1", members)).build();
     }
 }
