@@ -24,7 +24,8 @@ public class Main {
     private static final Logger logger = Logger.getLogger(Main.class);
 
     // Base URI the Grizzly HTTP server will listen on
-    public static final String BASE_URI = "http://192.168.10.92:8080/dsaApp/";
+    //public static final String BASE_URI = "http://192.168.10.92:8080/dsaApp/";
+    public static final String BASE_URI = "http://localhost:8080/dsaApp/";
 
     /**
      * Starts Grizzly HTTP server exposing JAX-RS resources defined in this application.
@@ -41,7 +42,7 @@ public class Main {
 
         BeanConfig beanConfig = new BeanConfig();
 
-        beanConfig.setHost("192.168.10.92:8080");
+        beanConfig.setHost("localhost:8080");
         beanConfig.setBasePath("/dsaApp");
         beanConfig.setContact("support@example.com");
         beanConfig.setDescription("Sigma shop");
