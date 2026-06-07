@@ -6,17 +6,18 @@ import edu.upc.dsa.models.AssistentResponse;
 import io.swagger.annotations.Api;
 import org.apache.log4j.Logger;
 
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.Scanner;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.util.Scanner;
 
 @Api(value = "/assistant", description = "Servicio de asistente IA")
 @Path("/assistant")
@@ -40,7 +41,8 @@ public class AssistentServicio {
             String question = request.getQuestion().trim();
             logger.info("Pregunta recibida en asistente IA: " + question);
 
-            return Response.ok(new AssistentResponse(askLlm(question))).build();
+            String answer = askLlm(question);
+            return Response.ok(new AssistentResponse(answer)).build();
         } catch (Exception e) {
             logger.error("Assistant error", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
@@ -61,9 +63,10 @@ public class AssistentServicio {
             connection.setConnectTimeout(10000);
             connection.setReadTimeout(60000);
 
+            String prompt = buildPrompt(question);
             String body = "{"
                     + "\"model\":\"" + LLM_MODEL + "\","
-                    + "\"prompt\":\"" + escapeJson(buildPrompt(question)) + "\","
+                    + "\"prompt\":\"" + escapeJson(prompt) + "\","
                     + "\"stream\":false"
                     + "}";
 
@@ -102,7 +105,7 @@ public class AssistentServicio {
         return "Eres un asistente de ayuda para la app SigmaDSA. "
                 + "Responde en castellano, de forma breve y clara. "
                 + "Ayuda al usuario a pasar pantallas o resolver dudas frecuentes de la app. "
-                + "Contexto de la app: hay login, registro, tienda, ECTS como moneda, compras, inventario, ranking, misiones y avatares. "
+                + "Contexto de la app: hay login, registro, tienda, ECTS como moneda, compras e inventario. "
                 + "No inventes funciones que no existan. "
                 + "Pregunta del usuario: " + question;
     }
@@ -188,15 +191,7 @@ public class AssistentServicio {
         }
 
         if (q.contains("inventario") || q.contains("objeto")) {
-            return "Para ver tus objetos comprados pulsa Ver inventario en la pantalla de tienda.";
-        }
-
-        if (q.contains("avatar")) {
-            return "Para cambiar el avatar, toca tu imagen en la pantalla de tienda y elige uno nuevo.";
-        }
-
-        if (q.contains("ranking") || q.contains("mision") || q.contains("misiones")) {
-            return "En la tienda puedes abrir las pestañas de ranking y misiones para ver tu progreso.";
+            return "Para ver tus objetos comprados pulsa el boton Ver inventario en la pantalla de tienda.";
         }
 
         if (q.contains("ects") || q.contains("creditos") || q.contains("moneda")) {
@@ -204,7 +199,7 @@ public class AssistentServicio {
         }
 
         if (q.contains("login") || q.contains("entrar") || q.contains("sesion")) {
-            return "Para entrar, introduce tu usuario o correo y tu contrasena en la pantalla de acceso.";
+            return "Para entrar, introduce tu usuario y contrasena en la pantalla de acceso y pulsa ENTRAR AL SISTEMA.";
         }
 
         if (q.contains("registrar") || q.contains("registro") || q.contains("cuenta")) {
