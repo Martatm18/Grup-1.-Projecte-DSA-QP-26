@@ -1,7 +1,9 @@
 package edu.upc.dsa;
 
+import edu.upc.dsa.services.AssistentServicio;
+import edu.upc.dsa.services.AuthServicio;
+import edu.upc.dsa.services.ProductoServicio;
 import io.swagger.jaxrs.config.BeanConfig;
-import io.swagger.jersey.listing.ApiListingResourceJSON;
 import org.apache.log4j.Logger;
 import org.glassfish.grizzly.http.server.HttpHandler;
 import org.glassfish.grizzly.http.server.Request;
@@ -33,7 +35,10 @@ public class Main {
     public static HttpServer startServer() {
         // create a resource config that scans for JAX-RS resources and providers
         // in edu.upc.dsa package
-        final ResourceConfig rc = new ResourceConfig().packages("edu.upc.dsa.services");
+        final ResourceConfig rc = new ResourceConfig();
+        rc.register(AssistentServicio.class);
+        rc.register(AuthServicio.class);
+        rc.register(ProductoServicio.class);
         rc.register(MyExceptionMapper.class);
 
         rc.register(io.swagger.jaxrs.listing.ApiListingResource.class);
