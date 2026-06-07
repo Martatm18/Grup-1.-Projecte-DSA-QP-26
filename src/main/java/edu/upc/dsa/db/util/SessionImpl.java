@@ -74,11 +74,10 @@ public class SessionImpl implements Session {
 
         try (PreparedStatement pstm = conn.prepareStatement(sql)) {
             pstm.setString(1, user.getNombre());
-            pstm.setString(2, user.getPassword());
-            pstm.setString(3, user.getEmail());
-            pstm.setInt(4, user.getEcts());
-            pstm.setString(5, user.getAvatar());
-            pstm.setString(6, user.getId());
+            pstm.setString(2, user.getEmail());
+            pstm.setInt(3, user.getEcts());
+            pstm.setString(4, user.getAvatar());
+            pstm.setString(5, user.getId());
 
             pstm.executeUpdate();
         } catch (SQLException e) {
@@ -311,7 +310,7 @@ public class SessionImpl implements Session {
         User user = new User(
                 rs.getString("username"),
                 rs.getString("name"),
-                rs.getString("password")
+                rs.getString("password_hash")
         );
 
         user.setEmail(rs.getString("email"));

@@ -32,6 +32,7 @@ public class QueryHelper {
         if (theClass == User.class) {
             if (field.equals("id")) return "username";
             if (field.equals("nombre")) return "name";
+            if (field.equals("password")) return "password_hash";
         }
         if (theClass == Producto.class) {
             if (field.equals("nombre")) return "name";
@@ -65,7 +66,12 @@ public class QueryHelper {
                 sb.append(" AND ");
             }
 
-            sb.append(getColumnName(theClass, key)).append("=?");
+            sb.append(getColumnName(theClass, key));
+            if (theClass == User.class && key.equals("password")) {
+                sb.append("=SHA2(?, 256)");
+            } else {
+                sb.append("=?");
+            }
             i++;
         }
 
@@ -73,11 +79,11 @@ public class QueryHelper {
     }
 
     public static String createInsertUser() {
-        return "INSERT INTO users (username, name, password, email, ects, avatar) VALUES (?, ?, ?, ?, ?, ?)";
+        return "INSERT INTO users (username, name, password_hash, email, ects, avatar) VALUES (?, ?, SHA2(?, 256), ?, ?, ?)";
     }
 
     public static String createUpdateUser() {
-        return "UPDATE users SET name=?, password=?, email=?, ects=?, avatar=? WHERE username=?";
+        return "UPDATE users SET name=?, email=?, ects=?, avatar=? WHERE username=?";
     }
 
     public static String createUpsertInventory() {
@@ -105,7 +111,7 @@ public class QueryHelper {
     }
 
     public static String createSelectRanking() {
-        return "SELECT u.username, u.name, u.email, u.password, u.ects, u.avatar, " +
+        return "SELECT u.username, u.name, u.email, u.password_hash, u.ects, u.avatar, " +
                 "g.health, g.max_health, g.current_mission_id, g.current_objetive_id, " +
                 "m.title AS mission_title, o.title AS objective_title " +
                 "FROM users u " +
