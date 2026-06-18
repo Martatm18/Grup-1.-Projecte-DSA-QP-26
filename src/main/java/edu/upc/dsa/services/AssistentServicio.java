@@ -41,7 +41,8 @@ public class AssistentServicio {
             String question = request.getQuestion().trim();
             logger.info("Pregunta recibida en asistente IA: " + question);
 
-            String answer = askLlm(question);
+            String context = request.getContext();
+            String answer = askLlm(question, context);
             return Response.ok(new AssistentResponse(answer)).build();
         } catch (Exception e) {
             logger.error("Assistant error", e);
@@ -51,7 +52,7 @@ public class AssistentServicio {
         }
     }
 
-    private String askLlm(String question) throws Exception {
+    private String askLlm(String question, String context) throws Exception {
         HttpURLConnection connection = null;
 
         try {
@@ -63,7 +64,7 @@ public class AssistentServicio {
             connection.setConnectTimeout(10000);
             connection.setReadTimeout(60000);
 
-            String prompt = buildPrompt(question);
+            String prompt = buildPrompt(question, context);
             logger.info("Llamando al LLM: " + LLM_URL + " model=" + LLM_MODEL);
             logger.debug("Prompt enviado al LLM: " + prompt);
 
@@ -125,12 +126,24 @@ public class AssistentServicio {
         return value.substring(0, maxLength) + "...";
     }
 
-    private String buildPrompt(String question) {
-        return "Eres un asistente de ayuda para la app SigmaDSA. "
-                + "Responde en castellano, de forma breve y clara. "
-                + "Ayuda al usuario a pasar pantallas o resolver dudas frecuentes de la app. "
-                + "Contexto de la app: hay login, registro, tienda, ECTS como moneda, compras e inventario. "
-                + "No inventes funciones que no existan. "
+    private String buildPrompt(String question, String context) {
+        String safeContext = isBlank(context) ? "No se ha enviado contexto dinamico desde la app." : truncate(context, 4000);
+
+        return "Eres el asistente de ayuda de SigmaDSA, una web/app de juego academico ambientado en EETAC/UPC.\n"
+                + "Responde siempre en castellano, breve y claro.\n"
+                + "Tu trabajo es ayudar a pasar pantallas, entender misiones, tienda, inventario, ECTS, login y registro.\n"
+                + "Reglas importantes:\n"
+                + "- Usa primero el CONTEXTO REAL que te envia la app.\n"
+                + "- Si preguntan por una mision, objetivo, producto o inventario, responde solo con lo que aparezca en el contexto.\n"
+                + "- No inventes misiones, pasos, tutoriales ni funciones que no aparezcan en el contexto.\n"
+                + "- Si el contexto no contiene la respuesta, di que no tienes datos suficientes y sugiere revisar la pestana Misiones.\n\n"
+                + "Contexto fijo de la app:\n"
+                + "- Hay login y registro.\n"
+                + "- La tienda usa ECTS como moneda.\n"
+                + "- Los objetos comprados aparecen en inventario.\n"
+                + "- La web tiene secciones Tienda, Ranking, Misiones y Asistente IA.\n\n"
+                + "CONTEXTO REAL ACTUAL:\n"
+                + safeContext + "\n\n"
                 + "Pregunta del usuario: " + question;
     }
 

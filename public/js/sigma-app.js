@@ -369,7 +369,10 @@ async function askAssistant(question) {
     const response = await fetch(`${ASSISTANT_API}/ask`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question })
+        body: JSON.stringify({
+            question,
+            context: buildAssistantContext()
+        })
     });
 
     if (!response.ok) {
@@ -381,6 +384,51 @@ async function askAssistant(question) {
 
     const data = await response.json();
     return data.answer || data.response || data.message || "";
+}
+
+function buildAssistantContext() {
+    const state = currentUser?.gameState || {};
+    const lines = [];
+
+    lines.push(`Usuario actual: ${currentUser?.nombre || currentUser?.id || "sin sesion"}`);
+    lines.push(`ECTS disponibles: ${currentUser?.ects ?? "desconocido"}`);
+    lines.push(`Mision actual del usuario: ${state.currentMissionTitle || state.currentMissionId || "desconocida"}`);
+    lines.push(`Objetivo actual del usuario: ${state.currentObjectiveTitle || state.currentObjectiveId || "desconocido"}`);
+
+    lines.push("Productos de tienda:");
+    if (shopProducts.length) {
+        shopProducts.forEach(product => {
+            lines.push(`- OBJ-${product.id}: ${product.nombre}. ${product.descripcion}. Precio: ${product.precio} ECTS.`);
+        });
+    } else {
+        lines.push("- No cargados.");
+    }
+
+    lines.push("Inventario del usuario:");
+    const inventoryItems = currentUser?.inventario || [];
+    if (inventoryItems.length) {
+        inventoryItems.forEach(item => {
+            lines.push(`- ${item.nombre}: ${item.descripcion || "sin descripcion"}.`);
+        });
+    } else {
+        lines.push("- Vacio.");
+    }
+
+    lines.push("Misiones configuradas:");
+    if (missionList.length) {
+        missionList.forEach(mission => {
+            const missionId = mission.id ?? mission.missionOrder ?? "?";
+            lines.push(`- Mision ${missionId}: ${mission.title || "sin titulo"}. ${mission.description || "sin descripcion"}.`);
+            const objectives = mission.objectives || [];
+            objectives.forEach(objective => {
+                lines.push(`  * Objetivo ${objective.id ?? "?"}: ${objective.title || "sin titulo"}. ${objective.description || "sin descripcion"}. Recompensa: ${objective.reward || 0} ECTS.`);
+            });
+        });
+    } else {
+        lines.push("- No cargadas.");
+    }
+
+    return lines.join("\n");
 }
 
 // ─── Tienda ───────────────────────────────────────────────────────────────────
@@ -769,6 +817,8 @@ assistantForm?.addEventListener("submit", async event => {
     setMessage("", "");
 
     try {
+        if (!missionList.length) await loadMissions();
+        if (!shopProducts.length) await loadProducts();
         const answer = await askAssistant(question);
         if (!answer.trim()) {
             assistantAnswer.innerHTML = '<p class="muted">El asistente no ha devuelto respuesta.</p>';
