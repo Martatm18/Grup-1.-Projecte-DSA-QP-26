@@ -68,9 +68,11 @@ function setTab(tab) {
     const btns  = { shop: tabShop,  ranking: tabRanking,  missions: tabMissions, assistant: tabAssistant };
 
     Object.entries(views).forEach(([key, el]) => {
+        if (!el) return;
         el.classList.toggle("hidden", key !== tab);
     });
     Object.entries(btns).forEach(([key, btn]) => {
+        if (!btn) return;
         btn.classList.toggle("secondary", key !== tab);
         btn.classList.toggle("active", key === tab);
     });

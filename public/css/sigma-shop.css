@@ -40,6 +40,10 @@ h1 {
     justify-content: end;
 }
 
+.main-tabs {
+    grid-template-columns: repeat(4, 1fr);
+}
+
 .avatar-option {
     display: grid;
     place-items: center;
