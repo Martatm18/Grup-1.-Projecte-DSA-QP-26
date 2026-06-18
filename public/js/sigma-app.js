@@ -1,5 +1,6 @@
 const AUTH_API = "/dsaApp/auth";
 const SHOP_API = "/dsaApp/tienda";
+const ASSISTANT_API = "/dsaApp/assistant";
 
 const loginForm    = document.getElementById("loginForm");
 const registerForm = document.getElementById("registerForm");
@@ -25,9 +26,15 @@ const mainTabs     = document.getElementById("mainTabs");
 const tabShop      = document.getElementById("tabShop");
 const tabRanking   = document.getElementById("tabRanking");
 const tabMissions  = document.getElementById("tabMissions");
+const tabAssistant = document.getElementById("tabAssistant");
 const viewShop     = document.getElementById("viewShop");
 const viewRanking  = document.getElementById("viewRanking");
 const viewMissions = document.getElementById("viewMissions");
+const viewAssistant = document.getElementById("viewAssistant");
+const assistantForm = document.getElementById("assistantForm");
+const assistantQuestion = document.getElementById("assistantQuestion");
+const assistantSubmit = document.getElementById("assistantSubmit");
+const assistantAnswer = document.getElementById("assistantAnswer");
 
 // Elementos de validación del registro
 const registerEmail           = document.getElementById("registerEmail");
@@ -45,12 +52,20 @@ const AVATARS = [
     "avatar_1","avatar_2","avatar_3","avatar_4","avatar_5","avatar_6",
     "avatar_7","avatar_8","avatar_9","avatar_10","avatar_11","avatar_12"
 ];
+const PRODUCT_IMAGES_BY_ID = {
+    1: "cargaMP.png",
+    2: "usbamarillo.png",
+    3: "tarjetatemporal.png",
+    4: "botiquin.png",
+    5: "bateriaseguridad.png",
+    6: "mapaampliado.png"
+};
 
 // ─── Pestañas ─────────────────────────────────────────────────────────────────
 
 function setTab(tab) {
-    const views = { shop: viewShop, ranking: viewRanking, missions: viewMissions };
-    const btns  = { shop: tabShop,  ranking: tabRanking,  missions: tabMissions  };
+    const views = { shop: viewShop, ranking: viewRanking, missions: viewMissions, assistant: viewAssistant };
+    const btns  = { shop: tabShop,  ranking: tabRanking,  missions: tabMissions, assistant: tabAssistant };
 
     Object.entries(views).forEach(([key, el]) => {
         el.classList.toggle("hidden", key !== tab);
@@ -70,6 +85,7 @@ tabMissions?.addEventListener("click", async () => {
     setTab("missions");
     if (!missionList.length) await loadMissions();
 });
+tabAssistant?.addEventListener("click", () => setTab("assistant"));
 
 // ─── Utilidades ───────────────────────────────────────────────────────────────
 
@@ -122,6 +138,32 @@ function cleanAvatar(avatar) {
 
 function avatarPath(avatar) {
     return `img/avatars/${cleanAvatar(avatar)}.png`;
+}
+
+function normalizeText(value) {
+    return String(value ?? "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase();
+}
+
+function productImageFile(product) {
+    const idImage = PRODUCT_IMAGES_BY_ID[Number(product?.id)];
+    if (idImage) return idImage;
+
+    const text = normalizeText(`${product?.nombre || ""} ${product?.descripcion || ""}`);
+    if (text.includes("botiquin")) return "botiquin.png";
+    if (text.includes("bateria") || text.includes("seguridad")) return "bateriaseguridad.png";
+    if (text.includes("carga") || text.includes("mp")) return "cargaMP.png";
+    if (text.includes("mapa")) return "mapaampliado.png";
+    if (text.includes("tarjeta")) return "tarjetatemporal.png";
+    if (text.includes("usb")) return "usbamarillo.png";
+
+    return "usbamarillo.png";
+}
+
+function productImagePath(product) {
+    return `img/objects/${productImageFile(product)}`;
 }
 
 function markSelectedAvatar(container, avatar) {
@@ -321,6 +363,24 @@ async function loadMissions() {
     }
 }
 
+async function askAssistant(question) {
+    const response = await fetch(`${ASSISTANT_API}/ask`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question })
+    });
+
+    if (!response.ok) {
+        const detail = await readErrorDetail(response);
+        const error = new Error(String(response.status));
+        error.detail = detail.message || detail.code || detail.raw || "";
+        throw error;
+    }
+
+    const data = await response.json();
+    return data.answer || data.response || data.message || "";
+}
+
 // ─── Tienda ───────────────────────────────────────────────────────────────────
 
 async function loadProducts() {
@@ -345,14 +405,17 @@ function renderProducts() {
 
         return `
             <article class="product">
-                <div class="product-code">OBJ-${escapeHtml(product.id)}</div>
-                <h3>${escapeHtml(product.nombre)}</h3>
-                <p>${escapeHtml(product.descripcion)}</p>
-                <div class="product-actions">
-                    <strong>${escapeHtml(product.precio)} ECTS</strong>
-                    <button type="button" data-product-id="${escapeHtml(product.id)}" ${canBuy ? "" : "disabled"}>
-                        ${buttonText}
-                    </button>
+                <img class="product-image" src="${productImagePath(product)}" alt="${escapeHtml(product.nombre)}">
+                <div class="product-content">
+                    <div class="product-code">OBJ-${escapeHtml(product.id)}</div>
+                    <h3>${escapeHtml(product.nombre)}</h3>
+                    <p>${escapeHtml(product.descripcion)}</p>
+                    <div class="product-actions">
+                        <strong>${escapeHtml(product.precio)} ECTS</strong>
+                        <button type="button" data-product-id="${escapeHtml(product.id)}" ${canBuy ? "" : "disabled"}>
+                            ${buttonText}
+                        </button>
+                    </div>
                 </div>
             </article> 
         `;
@@ -458,7 +521,8 @@ function renderInventory() {
 
     inventory.innerHTML = Object.values(grouped).map(item => `
         <span class="inventory-chip">
-            ${escapeHtml(item.nombre)}${item.cantidad > 1 ? ` <span class="inventory-qty">x${item.cantidad}</span>` : ""}
+            <img src="${productImagePath(item)}" alt="${escapeHtml(item.nombre)}">
+            <span>${escapeHtml(item.nombre)}${item.cantidad > 1 ? ` <span class="inventory-qty">x${item.cantidad}</span>` : ""}</span>
             <button class="inventory-delete" type="button" data-inventory-product-id="${escapeHtml(item.id)}" aria-label="Eliminar ${escapeHtml(item.nombre)}">
                 Eliminar
             </button>
@@ -686,6 +750,35 @@ sessionAvatarPicker?.addEventListener("click", async event => {
 changeAvatarButton?.addEventListener("click", () => {
     const isHidden = sessionAvatarPicker.classList.toggle("hidden");
     changeAvatarButton.textContent = isHidden ? "Cambiar avatar" : "Cerrar avatares";
+});
+
+assistantForm?.addEventListener("submit", async event => {
+    event.preventDefault();
+    if (!currentUser) {
+        setMessage("Inicia sesion para usar el asistente IA.", "error");
+        return;
+    }
+
+    const question = assistantQuestion.value.trim();
+    if (!question) return;
+
+    assistantSubmit.disabled = true;
+    assistantAnswer.innerHTML = '<p class="muted">Consultando asistente IA...</p>';
+    setMessage("", "");
+
+    try {
+        const answer = await askAssistant(question);
+        if (!answer.trim()) {
+            assistantAnswer.innerHTML = '<p class="muted">El asistente no ha devuelto respuesta.</p>';
+            return;
+        }
+        assistantAnswer.innerHTML = `<p>${escapeHtml(answer)}</p>`;
+    } catch (error) {
+        const detail = error.detail ? ` ${error.detail}` : "";
+        assistantAnswer.innerHTML = `<p class="assistant-error">No se pudo obtener respuesta del asistente. Error ${escapeHtml(error.message)}.${escapeHtml(detail)}</p>`;
+    } finally {
+        assistantSubmit.disabled = false;
+    }
 });
 
 showLogin.addEventListener("click", () => setMode("login"));

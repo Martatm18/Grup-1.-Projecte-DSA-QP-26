@@ -46,12 +46,12 @@ public class AssistentServicio {
         } catch (Exception e) {
             logger.error("Assistant error", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new ApiError("INTERNAL_SERVER_ERROR", "Error interno del servidor."))
+                    .entity(new ApiError("LLM_ERROR", e.getMessage()))
                     .build();
         }
     }
 
-    private String askLlm(String question) {
+    private String askLlm(String question) throws Exception {
         HttpURLConnection connection = null;
 
         try {
@@ -64,6 +64,9 @@ public class AssistentServicio {
             connection.setReadTimeout(60000);
 
             String prompt = buildPrompt(question);
+            logger.info("Llamando al LLM: " + LLM_URL + " model=" + LLM_MODEL);
+            logger.debug("Prompt enviado al LLM: " + prompt);
+
             String body = "{"
                     + "\"model\":\"" + LLM_MODEL + "\","
                     + "\"prompt\":\"" + escapeJson(prompt) + "\","
@@ -75,30 +78,51 @@ public class AssistentServicio {
             os.close();
 
             int status = connection.getResponseCode();
+            logger.info("Codigo HTTP recibido del LLM: " + status);
             if (status != 200) {
+                String errorBody = readStream(connection.getErrorStream());
                 logger.warn("LLM error code: " + status);
-                return generateDummyAnswer(question);
+                logger.warn("Respuesta de error del LLM: " + truncate(errorBody, 500));
+                throw new RuntimeException("LLM devolvio HTTP " + status + ": " + truncate(errorBody, 300));
             }
 
-            Scanner scanner = new Scanner(connection.getInputStream(), "UTF-8").useDelimiter("\\A");
-            String json = scanner.hasNext() ? scanner.next() : "";
-            scanner.close();
+            String json = readStream(connection.getInputStream());
+            logger.debug("Respuesta raw del LLM: " + truncate(json, 500));
 
             String response = extractResponse(json);
             if (isBlank(response)) {
-                logger.warn("LLM response empty, using dummy answer");
-                return generateDummyAnswer(question);
+                logger.warn("LLM response empty");
+                throw new RuntimeException("El LLM devolvio una respuesta vacia o sin campo response: " + truncate(json, 300));
             }
 
+            logger.info("Respuesta LLM parseada correctamente. Longitud=" + response.length());
             return response;
         } catch (Exception e) {
-            logger.warn("LLM unavailable, using dummy answer", e);
-            return generateDummyAnswer(question);
+            logger.error("LLM unavailable", e);
+            throw e;
         } finally {
             if (connection != null) {
                 connection.disconnect();
             }
         }
+    }
+
+    private String readStream(java.io.InputStream stream) {
+        if (stream == null) {
+            return "";
+        }
+
+        Scanner scanner = new Scanner(stream, "UTF-8").useDelimiter("\\A");
+        String value = scanner.hasNext() ? scanner.next() : "";
+        scanner.close();
+        return value;
+    }
+
+    private String truncate(String value, int maxLength) {
+        if (value == null || value.length() <= maxLength) {
+            return value;
+        }
+        return value.substring(0, maxLength) + "...";
     }
 
     private String buildPrompt(String question) {
@@ -181,32 +205,6 @@ public class AssistentServicio {
         }
 
         return result.toString();
-    }
-
-    private String generateDummyAnswer(String question) {
-        String q = question.toLowerCase();
-
-        if (q.contains("comprar") || q.contains("tienda") || q.contains("producto")) {
-            return "Para comprar un producto entra en la tienda, revisa tus ECTS y pulsa COMPRAR en el objeto que quieras.";
-        }
-
-        if (q.contains("inventario") || q.contains("objeto")) {
-            return "Para ver tus objetos comprados pulsa el boton Ver inventario en la pantalla de tienda.";
-        }
-
-        if (q.contains("ects") || q.contains("creditos") || q.contains("moneda")) {
-            return "Los ECTS son la moneda del juego. Sirven para comprar objetos y desbloquear pistas.";
-        }
-
-        if (q.contains("login") || q.contains("entrar") || q.contains("sesion")) {
-            return "Para entrar, introduce tu usuario y contrasena en la pantalla de acceso y pulsa ENTRAR AL SISTEMA.";
-        }
-
-        if (q.contains("registrar") || q.contains("registro") || q.contains("cuenta")) {
-            return "Para crear una cuenta, ve a REGISTRO, completa los campos obligatorios y pulsa CREAR USUARIO.";
-        }
-
-        return "Revisa la pantalla actual, lee las pistas disponibles y usa los botones principales para avanzar.";
     }
 
     private boolean isBlank(String value) {

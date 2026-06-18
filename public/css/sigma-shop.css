@@ -143,8 +143,27 @@ h1 {
 
 .product {
     display: grid;
-    gap: 10px;
+    grid-template-columns: 112px minmax(0, 1fr);
+    gap: 14px;
+    align-items: stretch;
     padding: 14px;
+}
+
+.product-image {
+    width: 100%;
+    aspect-ratio: 1;
+    align-self: start;
+    border: 1px solid rgba(69, 230, 255, 0.24);
+    border-radius: 6px;
+    object-fit: contain;
+    background: rgba(3, 9, 16, 0.72);
+    padding: 8px;
+}
+
+.product-content {
+    display: grid;
+    gap: 8px;
+    min-width: 0;
 }
 
 .product h3 {
@@ -233,6 +252,60 @@ button:disabled {
 }
 
 /* Reparación crítica del layout del Ranking */
+.assistant-panel {
+    display: grid;
+    gap: 14px;
+}
+
+.assistant-form {
+    display: grid;
+    gap: 10px;
+}
+
+.assistant-form label {
+    color: var(--cyan);
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.assistant-form textarea {
+    width: 100%;
+    min-height: 120px;
+    resize: vertical;
+    padding: 12px;
+    border: 1px solid rgba(69, 230, 255, 0.26);
+    border-radius: 6px;
+    color: var(--text);
+    background: rgba(3, 9, 16, 0.72);
+    font: 14px/1.45 "Consolas", "Courier New", monospace;
+    outline: none;
+}
+
+.assistant-form textarea:focus {
+    border-color: rgba(85, 255, 153, 0.44);
+    box-shadow: 0 0 0 2px rgba(85, 255, 153, 0.08);
+}
+
+.assistant-answer {
+    min-height: 90px;
+    padding: 12px;
+    border: 1px solid rgba(85, 255, 153, 0.22);
+    border-radius: 6px;
+    background: rgba(4, 42, 24, 0.18);
+    color: var(--green);
+    font: 13px/1.5 "Consolas", "Courier New", monospace;
+    white-space: pre-line;
+}
+
+.assistant-answer p {
+    margin: 0;
+}
+
+.assistant-error {
+    color: #ffb6c0;
+}
+
 .ranking-row {
     display: grid;
     grid-template-columns: 28px 38px minmax(0, 1fr) auto;
@@ -402,6 +475,17 @@ button:disabled {
     font-size: 12px;
 }
 
+.inventory-chip img {
+    width: 28px;
+    height: 28px;
+    flex: 0 0 auto;
+    border: 1px solid rgba(85, 255, 153, 0.18);
+    border-radius: 4px;
+    object-fit: contain;
+    background: rgba(3, 9, 16, 0.55);
+    padding: 2px;
+}
+
 .inventory-delete {
     min-height: 20px;
     padding: 2px 6px;
@@ -418,6 +502,11 @@ button:disabled {
 }
 
 @media (max-width: 520px) {
+    .product {
+        grid-template-columns: 78px minmax(0, 1fr);
+        gap: 10px;
+    }
+
     .product-actions {
         grid-template-columns: 1fr;
     }

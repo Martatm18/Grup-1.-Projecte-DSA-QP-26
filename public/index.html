@@ -148,6 +148,7 @@
             <button id="tabShop"    class="tab-btn active"    type="button">Tienda</button>
             <button id="tabRanking" class="tab-btn secondary" type="button">Ranking</button>
             <button id="tabMissions" class="tab-btn secondary" type="button">Misiones</button>
+            <button id="tabAssistant" class="tab-btn secondary" type="button">Asistente IA</button>
         </div>
 
         <!-- VISTA: TIENDA -->
@@ -188,6 +189,24 @@
                 </div>
                 <div id="missions" class="missions-list">
                     <p class="muted">Las misiones aparecerán al iniciar sesión.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISTA: ASISTENTE IA -->
+        <div id="viewAssistant" class="hidden">
+            <div class="data-panel assistant-panel" aria-labelledby="assistantTitle">
+                <div>
+                    <p class="eyebrow">Soporte de misión</p>
+                    <h3 id="assistantTitle">Asistente IA</h3>
+                </div>
+                <form id="assistantForm" class="assistant-form">
+                    <label for="assistantQuestion">Pregunta</label>
+                    <textarea id="assistantQuestion" rows="4" required placeholder="Pregunta cómo pasar una pantalla o resolver una duda frecuente..."></textarea>
+                    <button id="assistantSubmit" type="submit">Preguntar</button>
+                </form>
+                <div id="assistantAnswer" class="assistant-answer" aria-live="polite">
+                    <p class="muted">Escribe una pregunta para consultar el LLM.</p>
                 </div>
             </div>
         </div>
