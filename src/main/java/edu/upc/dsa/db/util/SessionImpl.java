@@ -4,6 +4,7 @@ import edu.upc.dsa.models.Producto;
 import edu.upc.dsa.models.Mission;
 import edu.upc.dsa.models.Objective;
 import edu.upc.dsa.models.Puzzle;
+import edu.upc.dsa.models.SigmaObject;
 import edu.upc.dsa.models.User;
 import edu.upc.dsa.models.UserGameState;
 import java.sql.*;
@@ -167,6 +168,31 @@ public class SessionImpl implements Session {
     }
 
     @Override
+    public List<SigmaObject> getMissionObjects(String username) {
+        List<SigmaObject> objects = new LinkedList<>();
+        boolean withUser = username != null && !username.trim().isEmpty();
+        String sql = withUser
+                ? QueryHelper.createSelectMissionObjectsByUser()
+                : QueryHelper.createSelectMissionObjects();
+
+        try (PreparedStatement pstm = conn.prepareStatement(sql)) {
+            if (withUser) {
+                pstm.setString(1, username.trim());
+            }
+
+            try (ResultSet rs = pstm.executeQuery()) {
+                while (rs.next()) {
+                    objects.add(buildSigmaObject(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return objects;
+    }
+
+    @Override
     public List<User> getRanking() {
         List<User> ranking = new ArrayList<>();
         String sql = QueryHelper.createSelectRanking();
@@ -327,6 +353,17 @@ public class SessionImpl implements Session {
                 rs.getString("name"),
                 rs.getString("description"),
                 rs.getInt("price")
+        );
+    }
+
+    private SigmaObject buildSigmaObject(ResultSet rs) throws SQLException {
+        return new SigmaObject(
+                rs.getInt("id"),
+                rs.getString("name"),
+                rs.getString("description"),
+                rs.getString("type"),
+                rs.getString("content"),
+                rs.getInt("obtenido") == 1
         );
     }
 

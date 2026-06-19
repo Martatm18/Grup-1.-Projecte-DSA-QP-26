@@ -10,6 +10,7 @@ const message      = document.getElementById("message");
 const userInfo     = document.getElementById("userInfo");
 const gameStateInfo = document.getElementById("gameStateInfo");
 const products     = document.getElementById("products");
+const missionObjects = document.getElementById("missionObjects");
 const inventory    = document.getElementById("inventory");
 const ranking      = document.getElementById("ranking");
 const missions     = document.getElementById("missions");
@@ -46,6 +47,7 @@ const passwordHelp            = document.getElementById("passwordHelp");
 
 let currentUser = JSON.parse(localStorage.getItem("currentUser") || "null");
 let shopProducts = [];
+let missionObjectList = [];
 let rankingPlayers = [];
 let missionList = [];
 const AVATARS = [
@@ -121,6 +123,7 @@ function renderShellState() {
 
 function clearSession(text) {
     currentUser = null;
+    missionObjectList = [];
     localStorage.clear();
     renderShellState();
     userInfo.textContent = "Inicia sesion para ver tu saldo.";
@@ -128,6 +131,7 @@ function clearSession(text) {
     renderAvatarState();
     renderGameState();
     products.innerHTML = `<p class="muted">${escapeHtml(text)}</p>`;
+    if (missionObjects) missionObjects.innerHTML = '<p class="muted">Los objetos de mision apareceran al iniciar sesion.</p>';
     ranking.innerHTML = '<p class="muted">Inicia sesion para ver el ranking.</p>';
     missions.innerHTML = '<p class="muted">Las misiones apareceran al iniciar sesion.</p>';
     renderInventory();
@@ -415,6 +419,17 @@ function buildAssistantContext() {
         lines.push("- Vacio.");
     }
 
+    lines.push("Objetos de mision:");
+    if (missionObjectList.length) {
+        missionObjectList.forEach(object => {
+            const status = object.obtenido ? "conseguido" : "pendiente";
+            const description = object.descripcion && object.descripcion !== "0" ? object.descripcion : "sin descripcion publica";
+            lines.push(`- ${object.nombre}: tipo ${object.tipo || "desconocido"}, estado ${status}. ${description}.`);
+        });
+    } else {
+        lines.push("- No cargados.");
+    }
+
     lines.push("Misiones configuradas:");
     if (missionList.length) {
         missionList.forEach(mission => {
@@ -444,6 +459,23 @@ async function loadProducts() {
     renderProducts();
 }
 
+async function loadMissionObjects() {
+    if (!missionObjects) return;
+
+    const endpoint = currentUser
+        ? `${SHOP_API}/objetos/${encodeURIComponent(currentUser.id)}`
+        : `${SHOP_API}/objetos`;
+
+    const response = await fetch(endpoint);
+    if (!response.ok) {
+        missionObjects.innerHTML = '<p class="muted">No se han podido cargar los objetos de mision.</p>';
+        return;
+    }
+
+    missionObjectList = await response.json();
+    renderMissionObjects();
+}
+
 function renderProducts() {
     if (!shopProducts.length) {
         products.innerHTML = '<p class="muted">No hay objetos disponibles en la tienda.</p>';
@@ -469,6 +501,37 @@ function renderProducts() {
                     </div>
                 </div>
             </article> 
+        `;
+    }).join("");
+}
+
+function renderMissionObjects() {
+    if (!missionObjects) return;
+
+    if (!missionObjectList.length) {
+        missionObjects.innerHTML = '<p class="muted">No hay objetos de mision configurados todavia.</p>';
+        return;
+    }
+
+    missionObjects.innerHTML = missionObjectList.map(object => {
+        const obtained = Boolean(object.obtenido);
+        const description = object.descripcion && object.descripcion !== "0"
+            ? object.descripcion
+            : "Se consigue avanzando en las misiones.";
+        const content = obtained && object.contenido
+            ? `<pre>${escapeHtml(object.contenido)}</pre>`
+            : "";
+
+        return `
+            <article class="mission-object ${obtained ? "obtained" : "locked"}">
+                <div class="mission-object-header">
+                    <span class="product-code">${escapeHtml(object.tipo || "OBJETO")}-${escapeHtml(object.id)}</span>
+                    <span class="mission-status">${obtained ? "Conseguido" : "Pendiente"}</span>
+                </div>
+                <h4>${escapeHtml(object.nombre)}</h4>
+                <p>${escapeHtml(description)}</p>
+                ${content}
+            </article>
         `;
     }).join("");
 }
@@ -624,6 +687,7 @@ async function buyProduct(productId) {
         renderAvatarState();
         renderGameState();
         renderProducts();
+        await loadMissionObjects();
         rankingPlayers = [];
         missionList = [];
         renderInventory();
@@ -647,6 +711,7 @@ async function renderSession() {
         renderAvatarState();
         renderGameState();
         products.innerHTML = '<p class="muted">Los productos apareceran al iniciar sesion.</p>';
+        if (missionObjects) missionObjects.innerHTML = '<p class="muted">Los objetos de mision apareceran al iniciar sesion.</p>';
         ranking.innerHTML = '<p class="muted">Inicia sesion para ver el ranking.</p>';
         missions.innerHTML = '<p class="muted">Las misiones apareceran al iniciar sesion.</p>';
         renderInventory();
@@ -672,6 +737,7 @@ async function renderSession() {
     // Cargar tienda, ranking y misiones de forma independiente
     // para que un fallo en uno no rompa los demás
     await loadProducts();
+    await loadMissionObjects();
     renderInventory();
     await loadRanking();
     await loadMissions();

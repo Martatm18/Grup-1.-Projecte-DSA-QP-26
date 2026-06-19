@@ -2,6 +2,7 @@ package edu.upc.dsa.db;
 
 import edu.upc.dsa.db.util.FactorySession;
 import edu.upc.dsa.db.util.Session;
+import edu.upc.dsa.models.SigmaObject;
 import edu.upc.dsa.models.Producto;
 import edu.upc.dsa.models.User;
 
@@ -64,6 +65,19 @@ public class ProductoDAO {
         try {
             session = FactorySession.openSession();
             return session.getInventory(username);
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+    }
+
+    public List<SigmaObject> getObjetosMision(String username) {
+        Session session = null;
+
+        try {
+            session = FactorySession.openSession();
+            return session.getMissionObjects(username);
         } finally {
             if (session != null) {
                 session.close();

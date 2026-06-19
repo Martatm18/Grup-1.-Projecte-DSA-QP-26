@@ -6,6 +6,8 @@ import edu.upc.dsa.db.GameProgressDAO;
 import edu.upc.dsa.models.ApiError;
 import edu.upc.dsa.models.ObjectiveResult;
 import edu.upc.dsa.models.Producto;
+import edu.upc.dsa.models.SigmaObject;
+import edu.upc.dsa.db.ProductoDAO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -26,11 +28,47 @@ public class ProductoServicio
 
     private ProductoManager pm;
     private GameProgressDAO gameProgressDAO;
+    private ProductoDAO productoDAO;
 
     public ProductoServicio()
     {
         this.pm = ProductoManagerImpl.getInstance();
         this.gameProgressDAO = new GameProgressDAO();
+        this.productoDAO = new ProductoDAO();
+    }
+
+    @GET
+    @Path("/objetos")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getObjetosMision()
+    {
+        try {
+            List<SigmaObject> lista = productoDAO.getObjetosMision(null);
+            GenericEntity<List<SigmaObject>> entity = new GenericEntity<List<SigmaObject>>(lista) {};
+            return Response.ok(entity).build();
+        } catch (Exception e) {
+            logger.error("Mission objects error", e);
+            return serverError();
+        }
+    }
+
+    @GET
+    @Path("/objetos/{idUser}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getObjetosMisionUsuario(@PathParam("idUser") String idUser)
+    {
+        try {
+            if (idUser == null || idUser.trim().isEmpty()) {
+                return error(Response.Status.BAD_REQUEST, "INVALID_USER_ID", "Identificador obligatorio.");
+            }
+
+            List<SigmaObject> lista = productoDAO.getObjetosMision(idUser.trim());
+            GenericEntity<List<SigmaObject>> entity = new GenericEntity<List<SigmaObject>>(lista) {};
+            return Response.ok(entity).build();
+        } catch (Exception e) {
+            logger.error("Mission objects by user error", e);
+            return serverError();
+        }
     }
 
     @GET

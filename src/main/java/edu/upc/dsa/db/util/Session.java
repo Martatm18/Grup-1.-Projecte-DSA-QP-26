@@ -4,6 +4,7 @@ import edu.upc.dsa.models.Mission;
 import edu.upc.dsa.models.Objective;
 import edu.upc.dsa.models.Producto;
 import edu.upc.dsa.models.Puzzle;
+import edu.upc.dsa.models.SigmaObject;
 import edu.upc.dsa.models.User;
 import edu.upc.dsa.models.UserGameState;
 
@@ -16,6 +17,7 @@ public interface Session {
     void addProductToInventory(String username, Integer productId);
     boolean removeProductFromInventory(String username, Integer productId);
     List<Producto> getInventory(String username);
+    List<SigmaObject> getMissionObjects(String username);
     List<User> getRanking();
     List<Mission> getMissionsWithObjectives();
     List<Object> findAll(Class theClass, LinkedHashMap<String, Object> params);

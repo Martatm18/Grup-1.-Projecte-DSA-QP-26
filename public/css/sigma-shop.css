@@ -262,6 +262,62 @@ button:disabled {
     font-size: 18px;
 }
 
+.mission-object-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 12px;
+}
+
+.mission-object {
+    border: 1px solid rgba(69, 230, 255, 0.18);
+    border-radius: 6px;
+    background: rgba(3, 9, 16, 0.58);
+    padding: 14px;
+    min-width: 0;
+}
+
+.mission-object.locked {
+    opacity: 0.68;
+}
+
+.mission-object.obtained {
+    border-color: rgba(74, 222, 128, 0.32);
+}
+
+.mission-object-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.mission-object h4 {
+    margin: 0 0 6px;
+    font-size: 14px;
+    overflow-wrap: anywhere;
+}
+
+.mission-object p {
+    margin: 0;
+    color: rgba(237, 247, 255, 0.72);
+    font-size: 12px;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+}
+
+.mission-object pre {
+    margin: 10px 0 0;
+    padding: 10px;
+    border: 1px solid rgba(69, 230, 255, 0.16);
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.28);
+    color: rgba(237, 247, 255, 0.82);
+    font: 11px/1.45 "Consolas", "Courier New", monospace;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
 .ranking-list,
 .missions-list {
     display: grid;

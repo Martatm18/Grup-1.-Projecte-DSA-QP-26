@@ -111,6 +111,24 @@ public class QueryHelper {
                 "WHERE i.username=?";
     }
 
+    public static String createSelectMissionObjects() {
+        return "SELECT id, name, description, type, 0 AS obtenido, NULL AS content " +
+                "FROM objects ORDER BY id ASC";
+    }
+
+    public static String createSelectMissionObjectsByUser() {
+        return "SELECT o.id, o.name, o.description, o.type, " +
+                "CASE WHEN earned.objects_id IS NULL THEN 0 ELSE 1 END AS obtenido, " +
+                "CASE WHEN earned.objects_id IS NULL THEN NULL ELSE o.content END AS content " +
+                "FROM objects o " +
+                "LEFT JOIN ( " +
+                "  SELECT DISTINCT r.objects_id FROM objective_rewards r " +
+                "  JOIN user_objectives uo ON uo.objective_id=r.objective_id " +
+                "  WHERE uo.username=? AND uo.completed=1 " +
+                ") earned ON earned.objects_id=o.id " +
+                "ORDER BY o.id ASC";
+    }
+
     public static String createSelectRanking() {
         return "SELECT u.username, u.name, u.email, u.password_hash, u.ects, u.avatar, " +
                 "g.health, g.max_health, g.current_mission_id, g.current_objetive_id, " +
