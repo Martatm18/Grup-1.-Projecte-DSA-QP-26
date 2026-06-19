@@ -2,7 +2,9 @@ package edu.upc.dsa.services;
 
 import edu.upc.dsa.ProductoManager;
 import edu.upc.dsa.ProductoManagerImpl;
+import edu.upc.dsa.db.GameProgressDAO;
 import edu.upc.dsa.models.ApiError;
+import edu.upc.dsa.models.ObjectiveResult;
 import edu.upc.dsa.models.Producto;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -23,10 +25,12 @@ public class ProductoServicio
     private static final Logger logger = Logger.getLogger(ProductoServicio.class);
 
     private ProductoManager pm;
+    private GameProgressDAO gameProgressDAO;
 
     public ProductoServicio()
     {
         this.pm = ProductoManagerImpl.getInstance();
+        this.gameProgressDAO = new GameProgressDAO();
     }
 
     @GET
@@ -84,11 +88,23 @@ public class ProductoServicio
 
     @POST
     @Path("/comprar/{idProd}/{idUser}")
+    @Produces(MediaType.APPLICATION_JSON)
     public Response comprar(@PathParam("idProd") String idProd, @PathParam("idUser") String idUser)
     {
         try {
             int status = pm.comprarProducto(idProd, idUser);
             if (status == 201) {
+                ObjectiveResult progress = null;
+                try {
+                    progress = gameProgressDAO.autoCompletarCompra(idUser.trim(), Integer.parseInt(idProd));
+                } catch (Exception e) {
+                    logger.warn("Compra realizada, pero no se pudo auto-completar objetivo de compra", e);
+                }
+
+                if (progress != null) {
+                    return Response.status(Response.Status.CREATED).entity(progress).build();
+                }
+
                 return Response.status(Response.Status.CREATED).build();
             }
             if (status == 400) {

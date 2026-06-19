@@ -3,6 +3,7 @@ package edu.upc.dsa.db.util;
 import edu.upc.dsa.models.Producto;
 import edu.upc.dsa.models.Mission;
 import edu.upc.dsa.models.Objective;
+import edu.upc.dsa.models.Puzzle;
 import edu.upc.dsa.models.User;
 import edu.upc.dsa.models.UserGameState;
 import java.sql.*;
@@ -361,6 +362,194 @@ public class SessionImpl implements Session {
                 rs.getString("reference"),
                 rs.getInt("reward")
         );
+    }
+
+    @Override
+    public void marcarObjetivoCompletado(String username, int objectiveId) {
+        try (PreparedStatement ps = conn.prepareStatement(QueryHelper.createUpsertUserObjective())) {
+            ps.setString(1, username);
+            ps.setInt(2, objectiveId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void marcarMisionCompletada(String username, int missionId) {
+        try (PreparedStatement ps = conn.prepareStatement(QueryHelper.createUpsertUserMission())) {
+            ps.setString(1, username);
+            ps.setInt(2, missionId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void darEcts(String username, int cantidad) {
+        try (PreparedStatement ps = conn.prepareStatement(QueryHelper.createAddEcts())) {
+            ps.setInt(1, cantidad);
+            ps.setString(2, username);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void updateGameState(String username, Integer missionId, Integer objectiveId) {
+        try (PreparedStatement ps = conn.prepareStatement(QueryHelper.createUpdateGameState())) {
+            ps.setObject(1, missionId);
+            ps.setObject(2, objectiveId);
+            ps.setString(3, username);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void updateGameStateObjective(String username, Integer objectiveId) {
+        try (PreparedStatement ps = conn.prepareStatement(QueryHelper.createUpdateGameStateObjective())) {
+            ps.setObject(1, objectiveId);
+            ps.setString(2, username);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public List<Integer> getObjectiveRewardShopIds(int objectiveId) {
+        List<Integer> ids = new ArrayList<>();
+        try (PreparedStatement ps = conn.prepareStatement(QueryHelper.createSelectObjectiveRewardNames())) {
+            ps.setInt(1, objectiveId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ids.add(rs.getInt("id"));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return ids;
+    }
+
+    @Override
+    public boolean isMisionCompleta(String username, int missionId) {
+        try (PreparedStatement ps = conn.prepareStatement(QueryHelper.createSelectMissionCompletionCheck())) {
+            ps.setString(1, username);
+            ps.setInt(2, missionId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    int total = rs.getInt("total");
+                    int done = rs.getInt("done");
+                    return total > 0 && total == done;
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return false;
+    }
+
+    @Override
+    public Mission getSiguienteMision(int missionId) {
+        try (PreparedStatement ps = conn.prepareStatement(QueryHelper.createSelectNextMission())) {
+            ps.setInt(1, missionId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return buildMission(rs);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return null;
+    }
+
+    @Override
+    public Objective getPrimerObjetivoMision(int missionId) {
+        try (PreparedStatement ps = conn.prepareStatement(QueryHelper.createSelectFirstObjectiveOfMission())) {
+            ps.setInt(1, missionId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return buildObjective(rs);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return null;
+    }
+
+    @Override
+    public Objective getSiguienteObjetivoPendiente(String username, int missionId) {
+        try (PreparedStatement ps = conn.prepareStatement(QueryHelper.createSelectNextPendingObjective())) {
+            ps.setString(1, username);
+            ps.setInt(2, missionId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return buildObjective(rs);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return null;
+    }
+
+    @Override
+    public Puzzle getPuzzleById(int puzzleId) {
+        try (PreparedStatement ps = conn.prepareStatement("SELECT * FROM puzzles WHERE id=?")) {
+            ps.setInt(1, puzzleId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return buildPuzzle(rs);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return null;
+    }
+
+    @Override
+    public UserGameState getEstadoJugador(String username) {
+        try (PreparedStatement ps = conn.prepareStatement(QueryHelper.createSelectGameState())) {
+            ps.setString(1, username);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    UserGameState state = buildUserGameState(rs);
+                    state.setCurrentMissionTitle(rs.getString("mission_title"));
+                    state.setCurrentObjectiveTitle(rs.getString("objective_title"));
+                    return state;
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return null;
+    }
+
+    @Override
+    public List<String> getCompletedRewardObjectNames(String username) {
+        List<String> names = new ArrayList<>();
+        try (PreparedStatement ps = conn.prepareStatement(QueryHelper.createSelectCompletedRewardObjectNames())) {
+            ps.setString(1, username);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    names.add(rs.getString("name"));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return names;
+    }
+
+    private Puzzle buildPuzzle(ResultSet rs) throws SQLException {
+        Puzzle p = new Puzzle();
+        p.setId(rs.getInt("id"));
+        p.setMissionId(rs.getInt("mission_id"));
+        p.setObjectiveId(rs.getObject("objective_id") == null ? null : rs.getInt("objective_id"));
+        p.setTitle(rs.getString("title"));
+        p.setDescription(rs.getString("description"));
+        p.setSolution(rs.getString("solution"));
+        return p;
     }
 
     @Override

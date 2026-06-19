@@ -135,6 +135,8 @@ public class AssistentServicio {
                 + "Reglas importantes:\n"
                 + "- Usa primero el CONTEXTO REAL que te envia la app.\n"
                 + "- Si preguntan por una mision, objetivo, producto o inventario, responde solo con lo que aparezca en el contexto.\n"
+                + "- Si preguntan de que va el juego y no hay una sinopsis en el contexto, di que no hay sinopsis suficiente en los datos actuales.\n"
+                + "- No conviertas funciones de la app, como comprar, tienda o inventario, en la historia u objetivo principal del juego.\n"
                 + "- No inventes misiones, pasos, tutoriales ni funciones que no aparezcan en el contexto.\n"
                 + "- Si el contexto no contiene la respuesta, di que no tienes datos suficientes y sugiere revisar la pestana Misiones.\n\n"
                 + "Contexto fijo de la app:\n"

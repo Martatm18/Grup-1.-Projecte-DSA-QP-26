@@ -390,6 +390,7 @@ function buildAssistantContext() {
     const state = currentUser?.gameState || {};
     const lines = [];
 
+    lines.push("Sinopsis fiable del juego: no hay una sinopsis narrativa definida en los datos cargados de la web. No inventar historia ni objetivo principal.");
     lines.push(`Usuario actual: ${currentUser?.nombre || currentUser?.id || "sin sesion"}`);
     lines.push(`ECTS disponibles: ${currentUser?.ects ?? "desconocido"}`);
     lines.push(`Mision actual del usuario: ${state.currentMissionTitle || state.currentMissionId || "desconocida"}`);
