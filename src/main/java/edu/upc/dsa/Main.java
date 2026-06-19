@@ -43,6 +43,7 @@ public class Main {
         rc.register(ProductoServicio.class);
         rc.register(MyExceptionMapper.class);
 
+
         rc.register(io.swagger.jaxrs.listing.ApiListingResource.class);
         rc.register(io.swagger.jaxrs.listing.SwaggerSerializers.class);
 

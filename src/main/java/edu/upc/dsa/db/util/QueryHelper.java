@@ -3,6 +3,7 @@ import edu.upc.dsa.models.Producto;
 import edu.upc.dsa.models.Mission;
 import edu.upc.dsa.models.Objective;
 import edu.upc.dsa.models.Puzzle;
+import edu.upc.dsa.models.Equipo;
 import edu.upc.dsa.models.User;
 import edu.upc.dsa.models.UserGameState;
 
@@ -16,6 +17,9 @@ public class QueryHelper {
         }
         if (theClass == Producto.class) {
             return "shop";
+        }
+        if (theClass == Equipo.class) {
+            return "equipos";
         }
         if (theClass == UserGameState.class) {
             return "user_game_state";
@@ -52,6 +56,10 @@ public class QueryHelper {
             if (field.equals("missionId")) return "mission_id";
             if (field.equals("objectiveOrder")) return "objective_order";
         }
+        if (theClass == Equipo.class) {
+            if (field.equals("nombre")) return "nombre";
+            if (field.equals("descripcion")) return "descripcion";
+        }
         return field;
     }
 
@@ -85,6 +93,26 @@ public class QueryHelper {
 
     public static String createUpdateUser() {
         return "UPDATE users SET name=?, email=?, ects=?, avatar=? WHERE username=?";
+    }
+
+    public static String createInsertEquipo() {
+        return "INSERT INTO equipos (id, nombre, descripcion) VALUES (?, ?, ?)";
+    }
+
+    public static String createSelectEquipos() {
+        return "SELECT id, nombre, descripcion FROM equipos ORDER BY id ASC";
+    }
+
+    public static String createSelectEquipoById() {
+        return "SELECT id, nombre, descripcion FROM equipos WHERE id=?";
+    }
+
+    public static String createInsertGrupoUsuario() {
+        return "INSERT INTO grupo_usuarios (grupo_id, username) VALUES (?, ?)";
+    }
+
+    public static String createSelectGrupoUsuario() {
+        return "SELECT 1 FROM grupo_usuarios WHERE grupo_id=? AND username=?";
     }
 
     public static String createUpsertInventory() {

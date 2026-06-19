@@ -5,6 +5,7 @@ import edu.upc.dsa.models.Mission;
 import edu.upc.dsa.models.Objective;
 import edu.upc.dsa.models.Puzzle;
 import edu.upc.dsa.models.SigmaObject;
+import edu.upc.dsa.models.Equipo;
 import edu.upc.dsa.models.User;
 import edu.upc.dsa.models.UserGameState;
 import java.sql.*;
@@ -28,6 +29,9 @@ public class SessionImpl implements Session {
         }
         else if (entity instanceof UserGameState) {
             saveUserGameState((UserGameState) entity);
+        }
+        else if (entity instanceof Equipo) {
+            saveEquipo((Equipo) entity);
         }
     }
 
@@ -65,6 +69,19 @@ public class SessionImpl implements Session {
             pstm.setObject(4, gameState.getCurrentMissionId());
             pstm.setObject(5, gameState.getCurrentObjectiveId());
 
+            pstm.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void saveEquipo(Equipo equipo) {
+        String sql = QueryHelper.createInsertEquipo();
+
+        try (PreparedStatement pstm = conn.prepareStatement(sql)) {
+            pstm.setString(1, equipo.getId());
+            pstm.setString(2, equipo.getNombre());
+            pstm.setString(3, equipo.getDescripcion());
             pstm.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -287,6 +304,9 @@ public class SessionImpl implements Session {
                 else if (theClass == Producto.class) {
                     result.add(buildProducto(rs));
                 }
+                else if (theClass == Equipo.class) {
+                    result.add(buildEquipo(rs));
+                }
                 else if (theClass == UserGameState.class) {
                     result.add(buildUserGameState(rs));
                 }
@@ -376,6 +396,14 @@ public class SessionImpl implements Session {
         gameState.setCurrentObjectiveId(rs.getObject("current_objetive_id") == null ? null : rs.getInt("current_objetive_id"));
 
         return gameState;
+    }
+
+    private Equipo buildEquipo(ResultSet rs) throws SQLException {
+        return new Equipo(
+                rs.getString("id"),
+                rs.getString("nombre"),
+                rs.getString("descripcion")
+        );
     }
 
     private Mission buildMission(ResultSet rs) throws SQLException {
