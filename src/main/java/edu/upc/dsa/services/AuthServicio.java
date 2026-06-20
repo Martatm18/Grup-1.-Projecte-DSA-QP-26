@@ -2,10 +2,12 @@ package edu.upc.dsa.services;
 
 import edu.upc.dsa.ProductoManager;
 import edu.upc.dsa.ProductoManagerImpl;
+import edu.upc.dsa.db.EquipoDAO;
 import edu.upc.dsa.db.GameStateDAO;
 import edu.upc.dsa.db.UserDAO;
 import edu.upc.dsa.models.ApiError;
 import edu.upc.dsa.models.AuthRequest;
+import edu.upc.dsa.models.Equipo;
 import edu.upc.dsa.models.Mission;
 import edu.upc.dsa.models.User;
 import edu.upc.dsa.models.ECTS;
@@ -31,12 +33,14 @@ public class AuthServicio
     private ProductoManager pm;
     private UserDAO userDAO;
     private GameStateDAO gameStateDAO;
+    private EquipoDAO equipoDAO;
 
     public AuthServicio()
     {
         this.pm = ProductoManagerImpl.getInstance();
         this.userDAO = new UserDAO();
         this.gameStateDAO = new GameStateDAO();
+        this.equipoDAO = new EquipoDAO();
     }
 
     @POST
@@ -153,6 +157,41 @@ public class AuthServicio
             return Response.ok(user).build();
         } catch (Exception e) {
             logger.error("Login by email error", e);
+            return serverError();
+        }
+    }
+
+    @GET
+    @Path("/grupos")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getGrupos()
+    {
+        try {
+            List<Equipo> equipos = equipoDAO.getEquipos();
+            GenericEntity<List<Equipo>> entity = new GenericEntity<List<Equipo>>(equipos) {};
+            return Response.ok(entity).build();
+        } catch (Exception e) {
+            logger.error("Get grupos error", e);
+            return serverError();
+        }
+    }
+
+    @POST
+    @Path("/grupos/{groupId}/join/{userId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response joinGrupo(@PathParam("groupId") String groupId, @PathParam("userId") String userId)
+    {
+        try {
+            int status = equipoDAO.unirseAGrupo(groupId, userId);
+            switch (status) {
+                case 201: return Response.status(Response.Status.CREATED).build();
+                case 400: return badRequest("MISSING_PARAMS", "Faltan groupId o userId.");
+                case 404: return error(Response.Status.NOT_FOUND, "NOT_FOUND", "Grupo o usuario no encontrado.");
+                case 409: return error(Response.Status.CONFLICT, "ALREADY_MEMBER", "El usuario ya pertenece al grupo.");
+                default:  return serverError();
+            }
+        } catch (Exception e) {
+            logger.error("Join grupo error", e);
             return serverError();
         }
     }

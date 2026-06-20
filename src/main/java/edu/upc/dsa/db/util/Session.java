@@ -41,4 +41,5 @@ public interface Session {
     UserGameState getEstadoJugador(String username);
     List<String> getCompletedRewardObjectNames(String username);
     List<Dialogue> getDialogues(String npcId, Integer missionId, String triggerCondition);
+    void updateHealth(String username, int delta);
 }

@@ -115,6 +115,18 @@ public class QueryHelper {
         return "SELECT 1 FROM grupo_usuarios WHERE grupo_id=? AND username=?";
     }
 
+    public static String createSelectGrupoDeUsuario() {
+        return "SELECT e.id, e.nombre, e.descripcion FROM equipos e " +
+               "JOIN grupo_usuarios gu ON gu.grupo_id = e.id " +
+               "WHERE gu.username=? LIMIT 1";
+    }
+
+    public static String createSelectMiembrosGrupo() {
+        return "SELECT u.username, u.name, u.avatar, u.ects FROM users u " +
+               "JOIN grupo_usuarios gu ON gu.username = u.username " +
+               "WHERE gu.grupo_id=? ORDER BY u.ects DESC";
+    }
+
     public static String createUpsertInventory() {
         return "INSERT INTO inventory (username, product_id, quantity) VALUES (?, ?, 1) " +
                 "ON DUPLICATE KEY UPDATE quantity = quantity + 1";
@@ -133,7 +145,7 @@ public class QueryHelper {
     }
 
     public static String createSelectInventory() {
-        return "SELECT s.id, s.name, s.description, s.price, i.quantity " +
+        return "SELECT s.id, s.name, s.description, s.price, s.slug, i.quantity " +
                 "FROM inventory i " +
                 "INNER JOIN shop s ON s.id = i.product_id " +
                 "WHERE i.username=?";
@@ -267,6 +279,16 @@ public class QueryHelper {
         if (field.equals("missionId")) return "mission_id";
         if (field.equals("objectiveId")) return "objective_id";
         return field;
+    }
+
+    public static String createUpdateHealth() {
+        return "UPDATE user_game_state SET health = GREATEST(0, LEAST(max_health, health + ?)) WHERE username=?";
+    }
+
+    public static String createSelectEquiposConMiembros() {
+        return "SELECT e.id, e.nombre, e.descripcion, COUNT(gu.username) AS miembros " +
+               "FROM equipos e LEFT JOIN grupo_usuarios gu ON gu.grupo_id=e.id " +
+               "GROUP BY e.id, e.nombre, e.descripcion ORDER BY e.id ASC";
     }
 
     public static String createSelectDialogues(boolean hasMission, boolean hasTrigger) {

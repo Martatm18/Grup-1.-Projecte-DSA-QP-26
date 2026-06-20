@@ -73,6 +73,26 @@ public class ProductoServicio
     }
 
     @GET
+    @Path("/objeto/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getObjeto(@PathParam("id") int id)
+    {
+        try {
+            List<SigmaObject> lista = productoDAO.getObjetosMision(null);
+            for (SigmaObject obj : lista) {
+                if (obj.getId() != null && obj.getId() == id) {
+                    return Response.ok(obj).build();
+                }
+            }
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity(new ApiError("NOT_FOUND", "Objeto no encontrado.")).build();
+        } catch (Exception e) {
+            logger.error("Get objeto error", e);
+            return serverError();
+        }
+    }
+
+    @GET
     @Path("/productos")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getProductos()

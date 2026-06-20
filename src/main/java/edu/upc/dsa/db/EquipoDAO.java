@@ -19,15 +19,17 @@ public class EquipoDAO {
         List<Equipo> equipos = new LinkedList<>();
 
         try (Connection conn = DBUtils.getConnection();
-             PreparedStatement pstm = conn.prepareStatement(QueryHelper.createSelectEquipos());
+             PreparedStatement pstm = conn.prepareStatement(QueryHelper.createSelectEquiposConMiembros());
              ResultSet rs = pstm.executeQuery()) {
 
             while (rs.next()) {
-                equipos.add(new Equipo(
+                Equipo e = new Equipo(
                         rs.getString("id"),
                         rs.getString("nombre"),
                         rs.getString("descripcion")
-                ));
+                );
+                e.setMiembros(rs.getInt("miembros"));
+                equipos.add(e);
             }
 
         } catch (SQLException e) {

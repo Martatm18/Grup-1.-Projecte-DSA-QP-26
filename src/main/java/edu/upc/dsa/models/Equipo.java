@@ -5,6 +5,7 @@ public class Equipo
     private String id;
     private String nombre;
     private String descripcion;
+    private int miembros;
 
     public Equipo()
     {
@@ -46,4 +47,7 @@ public class Equipo
     {
         this.descripcion = descripcion;
     }
+
+    public int getMiembros() { return miembros; }
+    public void setMiembros(int miembros) { this.miembros = miembros; }
 }

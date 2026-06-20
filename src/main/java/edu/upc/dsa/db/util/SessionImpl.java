@@ -369,12 +369,14 @@ public class SessionImpl implements Session {
     }
 
     private Producto buildProducto(ResultSet rs) throws SQLException {
-        return new Producto(
+        Producto p = new Producto(
                 rs.getInt("id"),
                 rs.getString("name"),
                 rs.getString("description"),
                 rs.getInt("price")
         );
+        p.setSlug(rs.getString("slug"));
+        return p;
     }
 
     private SigmaObject buildSigmaObject(ResultSet rs) throws SQLException {
@@ -605,6 +607,17 @@ public class SessionImpl implements Session {
             throw new RuntimeException(e);
         }
         return names;
+    }
+
+    @Override
+    public void updateHealth(String username, int delta) {
+        try (PreparedStatement ps = conn.prepareStatement(QueryHelper.createUpdateHealth())) {
+            ps.setInt(1, delta);
+            ps.setString(2, username);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

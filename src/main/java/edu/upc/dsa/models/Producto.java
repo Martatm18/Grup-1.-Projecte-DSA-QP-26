@@ -6,7 +6,8 @@ public class Producto
     private Integer id;
     private String nombre;
     private String descripcion;
-    private int precio; // El coste en la moneda del juego (ECTS)
+    private int precio;
+    private String slug;
 
     // Constructor vacío necesario para que los frameworks de JSON funcionen
     public Producto() {}
@@ -53,4 +54,6 @@ public class Producto
     {
         this.precio = precio;
     }
+    public String getSlug() { return slug; }
+    public void setSlug(String slug) { this.slug = slug; }
 }

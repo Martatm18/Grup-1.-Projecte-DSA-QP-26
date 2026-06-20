@@ -130,7 +130,7 @@ public class GameProgressDAO {
             Puzzle puzzle = session.getPuzzleById(puzzleId);
             if (puzzle == null) throw new RuntimeException("Puzzle no encontrado: " + puzzleId);
 
-            if (!puzzle.getSolution().trim().equalsIgnoreCase(respuesta.trim())) {
+            if (!isCorrectSolution(puzzle.getSolution(), respuesta)) {
                 throw new RuntimeException("RESPUESTA_INCORRECTA");
             }
 
@@ -197,36 +197,28 @@ public class GameProgressDAO {
         String required = normalizeKey(objectKey);
 
         for (Producto product : session.getInventory(username)) {
-            if (matchesObject(required, product.getNombre())) {
-                return true;
-            }
+            String slug = product.getSlug();
+            String match = (slug != null && !slug.isEmpty()) ? slug : normalizeKey(product.getNombre());
+            if (required.equals(match)) return true;
         }
 
         for (String rewardObjectName : session.getCompletedRewardObjectNames(username)) {
-            if (matchesObject(required, rewardObjectName)) {
-                return true;
-            }
+            if (required.equals(normalizeKey(rewardObjectName))) return true;
         }
 
         return false;
     }
 
     private boolean matchesObject(String required, String actualName) {
-        String actual = normalizeKey(actualName);
-        if (required.equals(actual)) {
-            return true;
-        }
+        return required.equals(normalizeKey(actualName));
+    }
 
-        if ("tarjeta_acceso".equals(required) && "tarjeta_de_acceso".equals(actual)) {
-            return true;
+    private boolean isCorrectSolution(String solution, String respuesta) {
+        if (solution == null || respuesta == null) return false;
+        String resp = respuesta.trim();
+        for (String valid : solution.split("\\|")) {
+            if (valid.trim().equalsIgnoreCase(resp)) return true;
         }
-        if ("bateria_seguridad".equals(required) && "bateria_de_seguridad".equals(actual)) {
-            return true;
-        }
-        if ("mapa_eetac_ampliado".equals(required) && "mapa_ampliado".equals(actual)) {
-            return true;
-        }
-
         return false;
     }
 

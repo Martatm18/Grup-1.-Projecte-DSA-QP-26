@@ -5,6 +5,7 @@ import edu.upc.dsa.services.AuthServicio;
 import edu.upc.dsa.services.DialogueServicio;
 import edu.upc.dsa.services.GameServicio;
 import edu.upc.dsa.services.ProductoServicio;
+import edu.upc.dsa.services.UserServicio;
 import io.swagger.jaxrs.config.BeanConfig;
 import org.apache.log4j.Logger;
 import org.glassfish.grizzly.http.server.HttpHandler;
@@ -43,6 +44,7 @@ public class Main {
         rc.register(DialogueServicio.class);
         rc.register(GameServicio.class);
         rc.register(ProductoServicio.class);
+        rc.register(UserServicio.class);
         rc.register(MyExceptionMapper.class);
 
 
