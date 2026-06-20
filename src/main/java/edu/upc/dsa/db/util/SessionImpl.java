@@ -1,5 +1,6 @@
 package edu.upc.dsa.db.util;
 
+import edu.upc.dsa.models.Dialogue;
 import edu.upc.dsa.models.Producto;
 import edu.upc.dsa.models.Mission;
 import edu.upc.dsa.models.Objective;
@@ -604,6 +605,38 @@ public class SessionImpl implements Session {
             throw new RuntimeException(e);
         }
         return names;
+    }
+
+    @Override
+    public List<Dialogue> getDialogues(String npcId, Integer missionId, String triggerCondition) {
+        List<Dialogue> result = new ArrayList<>();
+        boolean hasMission = missionId != null;
+        boolean hasTrigger = triggerCondition != null && !triggerCondition.isEmpty();
+        String sql = QueryHelper.createSelectDialogues(hasMission, hasTrigger);
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            int idx = 1;
+            ps.setString(idx++, npcId);
+            if (hasMission) ps.setInt(idx++, missionId);
+            if (hasTrigger) ps.setString(idx, triggerCondition);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) result.add(buildDialogue(rs));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return result;
+    }
+
+    private Dialogue buildDialogue(ResultSet rs) throws SQLException {
+        Dialogue d = new Dialogue();
+        d.setId(rs.getInt("id"));
+        d.setNpcId(rs.getString("npc_id"));
+        d.setMissionId(rs.getObject("mission_id") == null ? null : rs.getInt("mission_id"));
+        d.setObjectiveId(rs.getObject("objective_id") == null ? null : rs.getInt("objective_id"));
+        d.setTriggerCondition(rs.getString("trigger_condition"));
+        d.setSequenceOrder(rs.getInt("sequence_order"));
+        d.setText(rs.getString("text"));
+        return d;
     }
 
     private Puzzle buildPuzzle(ResultSet rs) throws SQLException {

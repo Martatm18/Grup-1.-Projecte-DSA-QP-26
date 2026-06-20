@@ -268,4 +268,13 @@ public class QueryHelper {
         if (field.equals("objectiveId")) return "objective_id";
         return field;
     }
+
+    public static String createSelectDialogues(boolean hasMission, boolean hasTrigger) {
+        StringBuilder sb = new StringBuilder(
+            "SELECT * FROM dialogues WHERE npc_id=?");
+        if (hasMission) sb.append(" AND mission_id=?");
+        if (hasTrigger) sb.append(" AND trigger_condition=?");
+        sb.append(" ORDER BY sequence_order ASC");
+        return sb.toString();
+    }
 }

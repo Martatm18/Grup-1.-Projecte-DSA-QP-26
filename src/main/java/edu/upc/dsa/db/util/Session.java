@@ -1,5 +1,6 @@
 package edu.upc.dsa.db.util;
 
+import edu.upc.dsa.models.Dialogue;
 import edu.upc.dsa.models.Mission;
 import edu.upc.dsa.models.Objective;
 import edu.upc.dsa.models.Producto;
@@ -39,4 +40,5 @@ public interface Session {
     Puzzle getPuzzleById(int puzzleId);
     UserGameState getEstadoJugador(String username);
     List<String> getCompletedRewardObjectNames(String username);
+    List<Dialogue> getDialogues(String npcId, Integer missionId, String triggerCondition);
 }
