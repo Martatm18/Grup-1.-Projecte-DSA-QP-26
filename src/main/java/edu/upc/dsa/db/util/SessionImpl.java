@@ -9,6 +9,7 @@ import edu.upc.dsa.models.SigmaObject;
 import edu.upc.dsa.models.Equipo;
 import edu.upc.dsa.models.User;
 import edu.upc.dsa.models.UserGameState;
+import edu.upc.dsa.models.Dialogue;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -239,6 +240,68 @@ public class SessionImpl implements Session {
     }
 
     @Override
+    public List<Dialogue> getDialogues(int missionId, int objectiveId) {
+        List<Dialogue> dialogues = new LinkedList<>();
+        String sql = QueryHelper.createSelectDialoguesByMissionObjective();
+
+        try (PreparedStatement pstm = conn.prepareStatement(sql)) {
+            pstm.setInt(1, missionId);
+            pstm.setInt(2, objectiveId);
+            try (ResultSet rs = pstm.executeQuery()) {
+                while (rs.next()) {
+                    dialogues.add(buildDialogue(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return dialogues;
+    }
+
+    @Override
+    public List<Dialogue> getDialogues(int missionId, int objectiveId, String npcId) {
+        List<Dialogue> dialogues = new LinkedList<>();
+        String sql = QueryHelper.createSelectDialoguesByMissionObjectiveAndNpc();
+
+        try (PreparedStatement pstm = conn.prepareStatement(sql)) {
+            pstm.setInt(1, missionId);
+            pstm.setInt(2, objectiveId);
+            pstm.setString(3, npcId);
+            try (ResultSet rs = pstm.executeQuery()) {
+                while (rs.next()) {
+                    dialogues.add(buildDialogue(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return dialogues;
+    }
+
+    @Override
+    public Dialogue getNextDialogue(int missionId, int objectiveId, String npcId, int sequenceOrder) {
+        String sql = QueryHelper.createSelectNextDialogueByMissionObjectiveNpcSequence();
+
+        try (PreparedStatement pstm = conn.prepareStatement(sql)) {
+            pstm.setInt(1, missionId);
+            pstm.setInt(2, objectiveId);
+            pstm.setString(3, npcId);
+            pstm.setInt(4, sequenceOrder);
+            try (ResultSet rs = pstm.executeQuery()) {
+                if (rs.next()) {
+                    return buildDialogue(rs);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return null;
+    }
+
+    @Override
     public List<Mission> getMissionsWithObjectives() {
         Map<Integer, Mission> missions = new LinkedHashMap<>();
         String sql = QueryHelper.createSelectMissionsWithObjectives();
@@ -429,6 +492,18 @@ public class SessionImpl implements Session {
                 rs.getString("type"),
                 rs.getString("reference"),
                 rs.getInt("reward")
+        );
+    }
+
+    private Dialogue buildDialogue(ResultSet rs) throws SQLException {
+        return new Dialogue(
+                rs.getInt("id"),
+                rs.getString("npc_id"),
+                rs.getObject("mission_id") == null ? null : rs.getInt("mission_id"),
+                rs.getObject("objective_id") == null ? null : rs.getInt("objective_id"),
+                rs.getString("trigger_condition"),
+                rs.getObject("sequence_order") == null ? null : rs.getInt("sequence_order"),
+                rs.getString("text")
         );
     }
 

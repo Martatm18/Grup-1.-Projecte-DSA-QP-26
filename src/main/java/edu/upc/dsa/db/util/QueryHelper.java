@@ -3,7 +3,11 @@ import edu.upc.dsa.models.Producto;
 import edu.upc.dsa.models.Mission;
 import edu.upc.dsa.models.Objective;
 import edu.upc.dsa.models.Puzzle;
+<<<<<<< Updated upstream
 import edu.upc.dsa.models.Equipo;
+=======
+import edu.upc.dsa.models.Dialogue;
+>>>>>>> Stashed changes
 import edu.upc.dsa.models.User;
 import edu.upc.dsa.models.UserGameState;
 
@@ -29,6 +33,9 @@ public class QueryHelper {
         }
         if (theClass == Objective.class) {
             return "objectives";
+        }
+        if (theClass == Dialogue.class) {
+            return "dialogues";
         }
         return theClass.getSimpleName().toLowerCase();
     }
@@ -56,11 +63,35 @@ public class QueryHelper {
             if (field.equals("missionId")) return "mission_id";
             if (field.equals("objectiveOrder")) return "objective_order";
         }
+<<<<<<< Updated upstream
         if (theClass == Equipo.class) {
             if (field.equals("nombre")) return "nombre";
             if (field.equals("descripcion")) return "descripcion";
+=======
+        if (theClass == Dialogue.class) {
+            if (field.equals("npcId")) return "npc_id";
+            if (field.equals("missionId")) return "mission_id";
+            if (field.equals("objectiveId")) return "objective_id";
+            if (field.equals("triggerCondition")) return "trigger_condition";
+            if (field.equals("sequenceOrder")) return "sequence_order";
+>>>>>>> Stashed changes
         }
         return field;
+    }
+
+    public static String createSelectDialoguesByMissionObjective() {
+        return "SELECT id, npc_id, mission_id, objective_id, trigger_condition, sequence_order, text " +
+                "FROM dialogues WHERE mission_id=? AND objective_id=? ORDER BY sequence_order ASC";
+    }
+
+    public static String createSelectDialoguesByMissionObjectiveAndNpc() {
+        return "SELECT id, npc_id, mission_id, objective_id, trigger_condition, sequence_order, text " +
+                "FROM dialogues WHERE mission_id=? AND objective_id=? AND npc_id=? ORDER BY sequence_order ASC";
+    }
+
+    public static String createSelectNextDialogueByMissionObjectiveNpcSequence() {
+        return "SELECT id, npc_id, mission_id, objective_id, trigger_condition, sequence_order, text " +
+                "FROM dialogues WHERE mission_id=? AND objective_id=? AND npc_id=? AND sequence_order>? ORDER BY sequence_order ASC LIMIT 1";
     }
 
     public static String createSelectFindAll(Class theClass, LinkedHashMap<String, Object> params) {
