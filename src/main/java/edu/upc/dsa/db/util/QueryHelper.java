@@ -248,7 +248,7 @@ public class QueryHelper {
         return "SELECT o.id, o.mission_id, o.title, o.description, o.objective_order, o.type, o.reference, o.reward " +
                 "FROM objectives o " +
                 "LEFT JOIN user_objectives uo ON uo.objective_id=o.id AND uo.username=? " +
-                "WHERE o.mission_id=? AND (uo.completed IS NULL OR uo.completed=0) " +
+                "WHERE o.mission_id=? AND o.type != 'IR_ZONA' AND (uo.completed IS NULL OR uo.completed=0) " +
                 "ORDER BY o.objective_order ASC LIMIT 1";
     }
 

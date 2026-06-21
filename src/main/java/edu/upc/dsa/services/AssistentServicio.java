@@ -48,6 +48,23 @@ public class AssistentServicio {
             logger.info("Mensaje a SIGMA de " + username + ": " + question);
             String playerContext = buildPlayerContext(username, request.getContext());
             String answer = askLlm(buildSigmaPrompt(question, playerContext));
+
+            // Si el objetivo activo es OBTENER_OBJETO, se completa al hablar con SIGMA
+            edu.upc.dsa.models.ObjectiveResult progress = null;
+            try {
+                progress = new edu.upc.dsa.db.GameProgressDAO().autoCompletarObtencion(username);
+            } catch (Exception e) {
+                logger.warn("No se pudo auto-completar objetivo OBTENER_OBJETO para " + username + ": " + e.getMessage());
+            }
+
+            if (progress != null) {
+                java.util.Map<String, Object> body = new java.util.HashMap<>();
+                body.put("respuesta", answer);
+                body.put("objectiveCompleted", true);
+                body.put("objectiveProgress", progress);
+                return Response.ok(body).build();
+            }
+
             return Response.ok(new AssistentResponse(answer)).build();
         } catch (Exception e) {
             logger.error("SIGMA error", e);

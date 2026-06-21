@@ -81,6 +81,40 @@ public class GameProgressDAO {
         }
     }
 
+    public ObjectiveResult autoCompletarObtencion(String username) {
+        Session session = null;
+        try {
+            session = FactorySession.openSession();
+            UserGameState state = session.getEstadoJugador(username);
+            if (state == null || state.getCurrentObjectiveId() == null) return null;
+            Objective objetivo = session.get(Objective.class, state.getCurrentObjectiveId());
+            if (objetivo == null || !"OBTENER_OBJETO".equals(objetivo.getType())) return null;
+            return completarObjetivo(username, objetivo.getId());
+        } finally {
+            if (session != null) session.close();
+        }
+    }
+
+    public ObjectiveResult autoCompletarUso(String username, String slug) {
+        Session session = null;
+        try {
+            session = FactorySession.openSession();
+
+            UserGameState state = session.getEstadoJugador(username);
+            if (state == null || state.getCurrentObjectiveId() == null) return null;
+
+            Objective objetivo = session.get(Objective.class, state.getCurrentObjectiveId());
+            if (objetivo == null || !"OBTENER_OBJETO".equals(objetivo.getType())) return null;
+
+            String ref = normalizeKey(objetivo.getReference());
+            if (!ref.equals(normalizeKey(slug))) return null;
+
+            return completarObjetivo(username, objetivo.getId());
+        } finally {
+            if (session != null) session.close();
+        }
+    }
+
     public ObjectiveResult autoCompletarCompra(String username, int productId) {
         Session session = null;
         try {

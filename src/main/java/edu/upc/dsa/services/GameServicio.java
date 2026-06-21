@@ -199,6 +199,18 @@ public class GameServicio {
             }
             UserGameState state = session.getEstadoJugador(username);
             result.put("health", state != null ? state.getHealth() : null);
+
+            // Auto-completar objetivo OBTENER_OBJETO si referencia este slug
+            try {
+                ObjectiveResult progress = dao.autoCompletarUso(username, slug);
+                if (progress != null) {
+                    result.put("objectiveCompleted", true);
+                    result.put("objectiveProgress", progress);
+                }
+            } catch (Exception e) {
+                logger.warn("No se pudo auto-completar objetivo de uso para " + username + "/" + slug, e);
+            }
+
             return Response.ok(result).build();
         } catch (Exception e) {
             logger.error("Error usar objeto " + slug + " para " + username, e);
