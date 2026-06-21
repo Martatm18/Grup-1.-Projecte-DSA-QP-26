@@ -180,7 +180,19 @@ public class GameProgressDAO {
         Session session = null;
         try {
             session = FactorySession.openSession();
-            return session.getEstadoJugador(username);
+            UserGameState state = session.getEstadoJugador(username);
+            if (state != null && state.getCurrentObjectiveId() != null) {
+                Objective obj = session.get(Objective.class, state.getCurrentObjectiveId());
+                if (obj != null && "IR_ZONA".equals(obj.getType())) {
+                    // Auto-completar IR_ZONA en cascada y actualizar el game state
+                    Objective siguiente = primerObjetivoNoIrZona(session, username, obj.getMissionId());
+                    if (siguiente != null) {
+                        session.updateGameStateObjective(username, siguiente.getId());
+                        state = session.getEstadoJugador(username);
+                    }
+                }
+            }
+            return state;
         } finally {
             if (session != null) session.close();
         }
