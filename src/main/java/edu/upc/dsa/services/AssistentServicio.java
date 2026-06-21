@@ -52,14 +52,20 @@ public class AssistentServicio {
 
             // Si el objetivo activo es OBTENER_OBJETO, se completa al hablar con SIGMA
             edu.upc.dsa.models.ObjectiveResult progress = null;
+            java.util.List<String> registros = new java.util.ArrayList<>();
             try {
-                progress = new edu.upc.dsa.db.GameProgressDAO().autoCompletarObtencion(username);
+                edu.upc.dsa.db.GameProgressDAO dao = new edu.upc.dsa.db.GameProgressDAO();
+                int objectiveIdAntes = dao.getCurrentObjectiveId(username);
+                progress = dao.autoCompletarObtencion(username);
+                if (progress != null) {
+                    registros = dao.getRegistrosDeObjetivo(objectiveIdAntes);
+                }
             } catch (Exception e) {
                 logger.warn("No se pudo auto-completar objetivo OBTENER_OBJETO para " + username + ": " + e.getMessage());
             }
 
             if (progress != null) {
-                return Response.ok(new SigmaResponseWithProgress(answer, progress)).build();
+                return Response.ok(new SigmaResponseWithProgress(answer, progress, registros)).build();
             }
 
             return Response.ok(new AssistentResponse(answer)).build();

@@ -82,6 +82,27 @@ public class GameProgressDAO {
         }
     }
 
+    public int getCurrentObjectiveId(String username) {
+        Session session = null;
+        try {
+            session = FactorySession.openSession();
+            UserGameState state = session.getEstadoJugador(username);
+            return (state != null && state.getCurrentObjectiveId() != null) ? state.getCurrentObjectiveId() : -1;
+        } finally {
+            if (session != null) session.close();
+        }
+    }
+
+    public List<String> getRegistrosDeObjetivo(int objectiveId) {
+        Session session = null;
+        try {
+            session = FactorySession.openSession();
+            return session.getObjectiveRegisterContents(objectiveId);
+        } finally {
+            if (session != null) session.close();
+        }
+    }
+
     public ObjectiveResult autoCompletarObtencion(String username) {
         Session session = null;
         try {

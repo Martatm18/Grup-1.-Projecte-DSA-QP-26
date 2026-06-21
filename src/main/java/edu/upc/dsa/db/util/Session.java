@@ -43,4 +43,5 @@ public interface Session {
     List<String> getCompletedRewardObjectNames(String username);
     List<Dialogue> getDialogues(String npcId, Integer missionId, String triggerCondition);
     void updateHealth(String username, int delta);
+    List<String> getObjectiveRegisterContents(int objectiveId);
 }

@@ -576,6 +576,28 @@ public class SessionImpl implements Session {
     }
 
     @Override
+    public List<String> getObjectiveRegisterContents(int objectiveId) {
+        List<String> contents = new ArrayList<>();
+        String sql = "SELECT o.content FROM objective_rewards r " +
+                     "JOIN objects o ON o.id = r.objects_id " +
+                     "WHERE r.objective_id = ? AND o.content IS NOT NULL";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, objectiveId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    String content = rs.getString("content");
+                    if (content != null && !content.isEmpty()) {
+                        contents.add(content);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return contents;
+    }
+
+    @Override
     public List<Puzzle> getPuzzlesByMission(int missionId) {
         List<Puzzle> list = new ArrayList<>();
         try (PreparedStatement ps = conn.prepareStatement("SELECT * FROM puzzles WHERE mission_id=? ORDER BY id ASC")) {
