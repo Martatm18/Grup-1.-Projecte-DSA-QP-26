@@ -55,7 +55,8 @@ public class GameProgressDAO {
 
                 Mission siguienteMision = session.getSiguienteMision(missionId);
                 if (siguienteMision != null) {
-                    Objective primerObjetivo = session.getPrimerObjetivoMision(siguienteMision.getId());
+                    // Saltarse IR_ZONA al principio de la nueva misión
+                    Objective primerObjetivo = primerObjetivoNoIrZona(session, username, siguienteMision.getId());
                     session.updateGameState(username, siguienteMision.getId(),
                             primerObjetivo != null ? primerObjetivo.getId() : null);
 
@@ -183,6 +184,16 @@ public class GameProgressDAO {
         } finally {
             if (session != null) session.close();
         }
+    }
+
+    private Objective primerObjetivoNoIrZona(Session session, String username, int missionId) {
+        Objective obj = session.getPrimerObjetivoMision(missionId);
+        int maxSaltos = 10;
+        while (obj != null && "IR_ZONA".equals(obj.getType()) && maxSaltos-- > 0) {
+            session.marcarObjetivoCompletado(username, obj.getId());
+            obj = session.getSiguienteObjetivoPendiente(username, missionId);
+        }
+        return obj;
     }
 
     private CanCompleteObjective puedeCompletar(Session session, String username, Objective objetivo) {
