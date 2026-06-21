@@ -5,12 +5,10 @@ import edu.upc.dsa.db.util.FactorySession;
 import edu.upc.dsa.db.util.Session;
 import edu.upc.dsa.models.ApiError;
 import edu.upc.dsa.models.CanCompleteObjective;
-import edu.upc.dsa.models.Dialogue;
 import edu.upc.dsa.models.ObjectiveResult;
 import edu.upc.dsa.models.Producto;
 import edu.upc.dsa.models.UserGameState;
 import io.swagger.annotations.Api;
-import java.util.List;
 import org.apache.log4j.Logger;
 
 import javax.ws.rs.*;
@@ -109,7 +107,6 @@ public class GameServicio {
         }
     }
 
-<<<<<<< Updated upstream
     /**
      * POST /game/{username}/dano
      * Body: { "cantidad": 20 }
@@ -300,52 +297,6 @@ public class GameServicio {
                 .replaceAll("^_+|_+$", "");
     }
 
-=======
-    @GET
-    @Path("/dialogues/{missionId}/{objectiveId}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getDialogues(
-            @PathParam("missionId") int missionId,
-            @PathParam("objectiveId") int objectiveId,
-            @QueryParam("npcId") String npcId) {
-        try {
-            List<Dialogue> dialogues;
-            if (npcId != null && !npcId.trim().isEmpty()) {
-                dialogues = dao.getDialogues(missionId, objectiveId, npcId.trim());
-            } else {
-                dialogues = dao.getDialogues(missionId, objectiveId);
-            }
-            return Response.ok(dialogues).build();
-        } catch (RuntimeException e) {
-            logger.error("Error get dialogues", e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new ApiError("ERROR", e.getMessage())).build();
-        }
-    }
-
-    @GET
-    @Path("/dialogues/{missionId}/{objectiveId}/{npcId}/next/{sequenceOrder}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getNextDialogue(
-            @PathParam("missionId") int missionId,
-            @PathParam("objectiveId") int objectiveId,
-            @PathParam("npcId") String npcId,
-            @PathParam("sequenceOrder") int sequenceOrder) {
-        try {
-            Dialogue nextDialogue = dao.getNextDialogue(missionId, objectiveId, npcId.trim(), sequenceOrder);
-            if (nextDialogue == null) {
-                return Response.status(Response.Status.NOT_FOUND)
-                        .entity(new ApiError("NOT_FOUND", "No hay mas dialogos para este NPC y secuencia.")).build();
-            }
-            return Response.ok(nextDialogue).build();
-        } catch (RuntimeException e) {
-            logger.error("Error get next dialogue", e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new ApiError("ERROR", e.getMessage())).build();
-        }
-    }
-
->>>>>>> Stashed changes
     public static class PuzzleRequest {
         private String respuesta;
         public String getRespuesta() { return respuesta; }

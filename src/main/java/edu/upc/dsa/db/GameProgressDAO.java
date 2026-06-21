@@ -3,7 +3,6 @@ package edu.upc.dsa.db;
 import edu.upc.dsa.db.util.FactorySession;
 import edu.upc.dsa.db.util.Session;
 import edu.upc.dsa.models.CanCompleteObjective;
-import edu.upc.dsa.models.Dialogue;
 import edu.upc.dsa.models.Mission;
 import edu.upc.dsa.models.Objective;
 import edu.upc.dsa.models.ObjectiveResult;
@@ -147,36 +146,6 @@ public class GameProgressDAO {
         try {
             session = FactorySession.openSession();
             return session.getEstadoJugador(username);
-        } finally {
-            if (session != null) session.close();
-        }
-    }
-
-    public List<Dialogue> getDialogues(int missionId, int objectiveId) {
-        Session session = null;
-        try {
-            session = FactorySession.openSession();
-            return session.getDialogues(missionId, objectiveId);
-        } finally {
-            if (session != null) session.close();
-        }
-    }
-
-    public List<Dialogue> getDialogues(int missionId, int objectiveId, String npcId) {
-        Session session = null;
-        try {
-            session = FactorySession.openSession();
-            return session.getDialogues(missionId, objectiveId, npcId);
-        } finally {
-            if (session != null) session.close();
-        }
-    }
-
-    public Dialogue getNextDialogue(int missionId, int objectiveId, String npcId, int sequenceOrder) {
-        Session session = null;
-        try {
-            session = FactorySession.openSession();
-            return session.getNextDialogue(missionId, objectiveId, npcId, sequenceOrder);
         } finally {
             if (session != null) session.close();
         }
