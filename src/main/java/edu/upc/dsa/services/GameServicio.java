@@ -16,12 +16,10 @@ import org.apache.log4j.Logger;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-@Api(value = "/game", description = "Progreso de misiones y puzzles")
+@Api(value = "/game")
 @Path("/game")
 public class GameServicio {
 
@@ -109,7 +107,6 @@ public class GameServicio {
         }
     }
 
-<<<<<<< Updated upstream
     /**
      * POST /game/{username}/dano
      * Body: { "cantidad": 20 }
@@ -300,7 +297,6 @@ public class GameServicio {
                 .replaceAll("^_+|_+$", "");
     }
 
-=======
     @GET
     @Path("/dialogues/{missionId}/{objectiveId}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -345,7 +341,6 @@ public class GameServicio {
         }
     }
 
->>>>>>> Stashed changes
     public static class PuzzleRequest {
         private String respuesta;
         public String getRespuesta() { return respuesta; }
