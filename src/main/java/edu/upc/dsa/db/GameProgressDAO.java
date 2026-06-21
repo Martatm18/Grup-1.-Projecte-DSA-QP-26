@@ -247,6 +247,10 @@ public class GameProgressDAO {
         return required.equals(normalizeKey(actualName));
     }
 
+    public boolean isCorrectSolutionPublic(String solution, String respuesta) {
+        return isCorrectSolution(solution, respuesta);
+    }
+
     private boolean isCorrectSolution(String solution, String respuesta) {
         if (solution == null || respuesta == null) return false;
         String resp = respuesta.trim();

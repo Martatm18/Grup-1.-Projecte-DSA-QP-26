@@ -576,6 +576,20 @@ public class SessionImpl implements Session {
     }
 
     @Override
+    public List<Puzzle> getPuzzlesByMission(int missionId) {
+        List<Puzzle> list = new ArrayList<>();
+        try (PreparedStatement ps = conn.prepareStatement("SELECT * FROM puzzles WHERE mission_id=? ORDER BY id ASC")) {
+            ps.setInt(1, missionId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) list.add(buildPuzzle(rs));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return list;
+    }
+
+    @Override
     public UserGameState getEstadoJugador(String username) {
         try (PreparedStatement ps = conn.prepareStatement(QueryHelper.createSelectGameState())) {
             ps.setString(1, username);

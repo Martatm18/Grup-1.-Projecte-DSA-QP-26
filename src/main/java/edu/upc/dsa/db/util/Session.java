@@ -38,6 +38,7 @@ public interface Session {
     Objective getPrimerObjetivoMision(int missionId);
     Objective getSiguienteObjetivoPendiente(String username, int missionId);
     Puzzle getPuzzleById(int puzzleId);
+    List<Puzzle> getPuzzlesByMission(int missionId);
     UserGameState getEstadoJugador(String username);
     List<String> getCompletedRewardObjectNames(String username);
     List<Dialogue> getDialogues(String npcId, Integer missionId, String triggerCondition);

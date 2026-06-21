@@ -26,14 +26,6 @@ public class GameServicio {
     private static final Logger logger = Logger.getLogger(GameServicio.class);
     private final GameProgressDAO dao = new GameProgressDAO();
 
-    // Preguntas de Toni: pregunta → respuesta correcta (normalizada)
-    private static final Map<Integer, String[]> TONI_PREGUNTAS = new HashMap<>();
-    static {
-        TONI_PREGUNTAS.put(1, new String[]{"¿Qué estructura de datos sigue el principio LIFO (Last In, First Out)?", "pila"});
-        TONI_PREGUNTAS.put(2, new String[]{"¿Qué estructura de datos sigue el principio FIFO (First In, First Out)?", "cola"});
-        TONI_PREGUNTAS.put(3, new String[]{"¿Qué operación añade un elemento a una pila?", "push"});
-        TONI_PREGUNTAS.put(4, new String[]{"¿Qué estructura de datos asocia claves con valores?", "hashmap"});
-    }
 
     @POST
     @Path("/{username}/objetivo/{objectiveId}/completar")
@@ -222,62 +214,69 @@ public class GameServicio {
     }
 
     /**
-     * GET /game/toni/pregunta/{id}
-     * Devuelve la pregunta de Toni (1-4).
+     * GET /game/toni/pregunta
+     * Devuelve una pregunta aleatoria de Toni (sin solución).
      */
     @GET
-    @Path("/toni/pregunta/{id}")
+    @Path("/toni/pregunta")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getToniPregunta(@PathParam("id") int id) {
-        String[] qa = TONI_PREGUNTAS.get(id);
-        if (qa == null) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity(new ApiError("NOT_FOUND", "Pregunta no encontrada.")).build();
+    public Response getToniPregunta() {
+        Session session = null;
+        try {
+            session = FactorySession.openSession();
+            List<Puzzle> puzzles = session.getPuzzlesByMission(7);
+            if (puzzles.isEmpty()) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity(new ApiError("NOT_FOUND", "No hay preguntas disponibles.")).build();
+            }
+            Puzzle p = puzzles.get(new java.util.Random().nextInt(puzzles.size()));
+            Map<String, Object> result = new HashMap<>();
+            result.put("id", p.getId());
+            result.put("titulo", p.getTitle());
+            result.put("pregunta", p.getDescription());
+            return Response.ok(result).build();
+        } catch (Exception e) {
+            logger.error("Error get pregunta Toni", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(new ApiError("ERROR", e.getMessage())).build();
+        } finally {
+            if (session != null) session.close();
         }
-        Map<String, Object> resp = new HashMap<>();
-        resp.put("id", id);
-        resp.put("pregunta", qa[0]);
-        return Response.ok(resp).build();
     }
 
     /**
-     * POST /game/{username}/toni/pregunta/{id}/responder
+     * POST /game/{username}/toni/puzzle/{puzzleId}/responder
      * Body: { "respuesta": "Pila" }
      * Si es correcta, da 2 ECTS. Devuelve { correcto, ects_ganados, ects_total }.
      */
     @POST
-    @Path("/{username}/toni/pregunta/{id}/responder")
+    @Path("/{username}/toni/puzzle/{puzzleId}/responder")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response responderToni(
             @PathParam("username") String username,
-            @PathParam("id") int id,
+            @PathParam("puzzleId") int puzzleId,
             PuzzleRequest body) {
-        String[] qa = TONI_PREGUNTAS.get(id);
-        if (qa == null) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity(new ApiError("NOT_FOUND", "Pregunta no encontrada.")).build();
-        }
-        String respuesta = body.getRespuesta();
-        boolean correcto = respuesta != null && normalize(respuesta).equals(qa[1]);
-
         Session session = null;
         try {
             session = FactorySession.openSession();
+            Puzzle puzzle = session.getPuzzleById(puzzleId);
+            if (puzzle == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity(new ApiError("NOT_FOUND", "Pregunta no encontrada.")).build();
+            }
+            boolean correcto = dao.isCorrectSolutionPublic(puzzle.getSolution(), body.getRespuesta());
             if (correcto) {
                 session.darEcts(username, 2);
             }
-            UserGameState state = session.getEstadoJugador(username);
+            edu.upc.dsa.models.User user = session.get(edu.upc.dsa.models.User.class, username);
             Map<String, Object> result = new HashMap<>();
             result.put("correcto", correcto);
             result.put("ects_ganados", correcto ? 2 : 0);
-            result.put("ects_total", state != null ? state.getHealth() : 0); // health reutilizado, ver abajo
-            // Obtener ects actuales del usuario
-            edu.upc.dsa.models.User user = session.get(edu.upc.dsa.models.User.class, username);
             result.put("ects_total", user != null ? user.getEcts() : 0);
             return Response.ok(result).build();
         } catch (Exception e) {
-            logger.error("Error responder Toni", e);
+            logger.error("Error responder Toni puzzle " + puzzleId, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity(new ApiError("ERROR", e.getMessage())).build();
         } finally {
