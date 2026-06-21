@@ -3,8 +3,11 @@ import edu.upc.dsa.models.Producto;
 import edu.upc.dsa.models.Mission;
 import edu.upc.dsa.models.Objective;
 import edu.upc.dsa.models.Puzzle;
-import edu.upc.dsa.models.Dialogue;
+<<<<<<< Updated upstream
 import edu.upc.dsa.models.Equipo;
+=======
+import edu.upc.dsa.models.Dialogue;
+>>>>>>> Stashed changes
 import edu.upc.dsa.models.User;
 import edu.upc.dsa.models.UserGameState;
 
@@ -12,7 +15,7 @@ import java.util.LinkedHashMap;
 
 public class QueryHelper {
 
-    public static String getTableName(Class<?> theClass) {
+    public static String getTableName(Class theClass) {
         if (theClass == User.class) {
             return "users";
         }
@@ -37,7 +40,7 @@ public class QueryHelper {
         return theClass.getSimpleName().toLowerCase();
     }
 
-    public static String getColumnName(Class<?> theClass, String field) {
+    public static String getColumnName(Class theClass, String field) {
         if (theClass == User.class) {
             if (field.equals("id")) return "username";
             if (field.equals("nombre")) return "name";
@@ -60,12 +63,18 @@ public class QueryHelper {
             if (field.equals("missionId")) return "mission_id";
             if (field.equals("objectiveOrder")) return "objective_order";
         }
+<<<<<<< Updated upstream
+        if (theClass == Equipo.class) {
+            if (field.equals("nombre")) return "nombre";
+            if (field.equals("descripcion")) return "descripcion";
+=======
         if (theClass == Dialogue.class) {
             if (field.equals("npcId")) return "npc_id";
             if (field.equals("missionId")) return "mission_id";
             if (field.equals("objectiveId")) return "objective_id";
             if (field.equals("triggerCondition")) return "trigger_condition";
             if (field.equals("sequenceOrder")) return "sequence_order";
+>>>>>>> Stashed changes
         }
         return field;
     }
@@ -85,7 +94,7 @@ public class QueryHelper {
                 "FROM dialogues WHERE mission_id=? AND objective_id=? AND npc_id=? AND sequence_order>? ORDER BY sequence_order ASC LIMIT 1";
     }
 
-    public static String createSelectFindAll(Class<?> theClass, LinkedHashMap<String, Object> params) {
+    public static String createSelectFindAll(Class theClass, LinkedHashMap<String, Object> params) {
         StringBuilder sb = new StringBuilder("SELECT * FROM ");
         sb.append(getTableName(theClass));
 
@@ -291,7 +300,7 @@ public class QueryHelper {
                 "WHERE uo.username=? AND uo.completed=1";
     }
 
-    public static String getTableName(Class<?> theClass, boolean forPuzzle) {
+    public static String getTableName(Class theClass, boolean forPuzzle) {
         if (theClass == Puzzle.class) return "puzzles";
         return getTableName(theClass);
     }

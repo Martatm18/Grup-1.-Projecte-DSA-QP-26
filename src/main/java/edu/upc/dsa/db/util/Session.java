@@ -21,7 +21,7 @@ public interface Session {
     List<SigmaObject> getMissionObjects(String username);
     List<User> getRanking();
     List<Mission> getMissionsWithObjectives();
-    List<Object> findAll(Class<?> theClass, LinkedHashMap<String, Object> params);
+    List<Object> findAll(Class theClass, LinkedHashMap<String, Object> params);
     <T> T get(Class<T> theClass, Object id);
     <T> T get(Class<T> theClass, String field, Object value);
     void close();
@@ -40,9 +40,12 @@ public interface Session {
     Puzzle getPuzzleById(int puzzleId);
     UserGameState getEstadoJugador(String username);
     List<String> getCompletedRewardObjectNames(String username);
+<<<<<<< Updated upstream
     List<Dialogue> getDialogues(String npcId, Integer missionId, String triggerCondition);
     void updateHealth(String username, int delta);
+=======
     List<Dialogue> getDialogues(int missionId, int objectiveId);
     List<Dialogue> getDialogues(int missionId, int objectiveId, String npcId);
     Dialogue getNextDialogue(int missionId, int objectiveId, String npcId, int sequenceOrder);
+>>>>>>> Stashed changes
 }

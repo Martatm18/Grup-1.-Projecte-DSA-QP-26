@@ -9,6 +9,7 @@ import edu.upc.dsa.models.SigmaObject;
 import edu.upc.dsa.models.Equipo;
 import edu.upc.dsa.models.User;
 import edu.upc.dsa.models.UserGameState;
+import edu.upc.dsa.models.Dialogue;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
