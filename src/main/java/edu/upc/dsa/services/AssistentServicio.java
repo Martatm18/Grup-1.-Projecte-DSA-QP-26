@@ -6,6 +6,7 @@ import edu.upc.dsa.models.ApiError;
 import edu.upc.dsa.models.AssistentRequest;
 import edu.upc.dsa.models.AssistentResponse;
 import edu.upc.dsa.models.Producto;
+import edu.upc.dsa.models.SigmaResponseWithProgress;
 import edu.upc.dsa.models.UserGameState;
 import io.swagger.annotations.Api;
 import org.apache.log4j.Logger;
@@ -58,11 +59,7 @@ public class AssistentServicio {
             }
 
             if (progress != null) {
-                java.util.Map<String, Object> body = new java.util.HashMap<>();
-                body.put("respuesta", answer);
-                body.put("objectiveCompleted", true);
-                body.put("objectiveProgress", progress);
-                return Response.ok(body).build();
+                return Response.ok(new SigmaResponseWithProgress(answer, progress)).build();
             }
 
             return Response.ok(new AssistentResponse(answer)).build();
