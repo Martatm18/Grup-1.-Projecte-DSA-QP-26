@@ -576,6 +576,30 @@ public class SessionImpl implements Session {
     }
 
     @Override
+    public List<String> getCompletedRegisterContentsForUser(String username) {
+        List<String> contents = new ArrayList<>();
+        String sql = "SELECT ob.content FROM user_objectives uo " +
+                     "JOIN objective_rewards r ON r.objective_id = uo.objective_id " +
+                     "JOIN objects ob ON ob.id = r.objects_id " +
+                     "JOIN objectives o ON o.id = uo.objective_id " +
+                     "WHERE uo.username = ? AND uo.completed = 1 AND o.type = 'OBTENER_OBJETO' " +
+                     "AND ob.content IS NOT NULL " +
+                     "ORDER BY uo.objective_id ASC";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, username);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    String content = rs.getString("content");
+                    if (content != null && !content.isEmpty()) contents.add(content);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return contents;
+    }
+
+    @Override
     public List<String> getObjectiveRegisterContents(int objectiveId) {
         List<String> contents = new ArrayList<>();
         String sql = "SELECT o.content FROM objective_rewards r " +

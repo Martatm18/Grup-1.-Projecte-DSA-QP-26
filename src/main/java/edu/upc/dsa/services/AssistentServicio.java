@@ -55,10 +55,9 @@ public class AssistentServicio {
             java.util.List<String> registros = new java.util.ArrayList<>();
             try {
                 edu.upc.dsa.db.GameProgressDAO dao = new edu.upc.dsa.db.GameProgressDAO();
-                int objectiveIdAntes = dao.getCurrentObjectiveId(username);
                 progress = dao.autoCompletarObtencion(username);
                 if (progress != null) {
-                    registros = dao.getRegistrosDeObjetivo(objectiveIdAntes);
+                    registros = dao.getRegistrosCompletadosEnMision(username);
                 }
             } catch (Exception e) {
                 logger.warn("No se pudo auto-completar objetivo OBTENER_OBJETO para " + username + ": " + e.getMessage());

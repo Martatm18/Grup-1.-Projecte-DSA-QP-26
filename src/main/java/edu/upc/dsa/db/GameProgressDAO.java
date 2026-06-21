@@ -93,6 +93,16 @@ public class GameProgressDAO {
         }
     }
 
+    public List<String> getRegistrosCompletadosEnMision(String username) {
+        Session session = null;
+        try {
+            session = FactorySession.openSession();
+            return session.getCompletedRegisterContentsForUser(username);
+        } finally {
+            if (session != null) session.close();
+        }
+    }
+
     public List<String> getRegistrosDeObjetivo(int objectiveId) {
         Session session = null;
         try {
@@ -111,7 +121,18 @@ public class GameProgressDAO {
             if (state == null || state.getCurrentObjectiveId() == null) return null;
             Objective objetivo = session.get(Objective.class, state.getCurrentObjectiveId());
             if (objetivo == null || !"OBTENER_OBJETO".equals(objetivo.getType())) return null;
-            return completarObjetivo(username, objetivo.getId());
+
+            // Completar en cascada todos los OBTENER_OBJETO consecutivos
+            ObjectiveResult lastResult = null;
+            int maxSaltos = 10;
+            while (objetivo != null && "OBTENER_OBJETO".equals(objetivo.getType()) && maxSaltos-- > 0) {
+                lastResult = completarObjetivo(username, objetivo.getId());
+                // Ver si el siguiente también es OBTENER_OBJETO
+                state = session.getEstadoJugador(username);
+                if (state == null || state.getCurrentObjectiveId() == null) break;
+                objetivo = session.get(Objective.class, state.getCurrentObjectiveId());
+            }
+            return lastResult;
         } finally {
             if (session != null) session.close();
         }

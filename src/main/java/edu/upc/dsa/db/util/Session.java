@@ -44,4 +44,5 @@ public interface Session {
     List<Dialogue> getDialogues(String npcId, Integer missionId, String triggerCondition);
     void updateHealth(String username, int delta);
     List<String> getObjectiveRegisterContents(int objectiveId);
+    List<String> getCompletedRegisterContentsForUser(String username);
 }
