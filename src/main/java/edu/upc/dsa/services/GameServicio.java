@@ -7,6 +7,7 @@ import edu.upc.dsa.models.ApiError;
 import edu.upc.dsa.models.CanCompleteObjective;
 import edu.upc.dsa.models.ObjectiveResult;
 import edu.upc.dsa.models.Producto;
+import edu.upc.dsa.models.Puzzle;
 import edu.upc.dsa.models.UserGameState;
 import io.swagger.annotations.Api;
 import org.apache.log4j.Logger;
