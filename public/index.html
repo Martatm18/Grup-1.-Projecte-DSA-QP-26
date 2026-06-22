@@ -6,7 +6,7 @@
     <title>Protocolo SIGMA | Acceso EETAC</title>
     <link rel="stylesheet" href="css/sigma-auth.css">
     <link rel="stylesheet" href="css/sigma-auth-tweaks.css">
-    <link rel="stylesheet" href="css/sigma-shop.css?v=5">
+    <link rel="stylesheet" href="css/sigma-shop.css?v=6">
 </head>
 <body class="sigma-body">
 <div class="screen-grid" aria-hidden="true"></div>
@@ -149,6 +149,7 @@
             <button id="tabRanking" class="tab-btn secondary" type="button">Ranking</button>
             <button id="tabMissions" class="tab-btn secondary" type="button">Misiones</button>
             <button id="tabAssistant" class="tab-btn secondary" type="button">Asistente IA</button>
+            <button id="tabTeams" class="tab-btn secondary" type="button">Equipos</button>
         </div>
 
         <!-- VISTA: TIENDA -->
@@ -198,6 +199,22 @@
                 </div>
                 <div id="missions" class="missions-list">
                     <p class="muted">Las misiones aparecerán al iniciar sesión.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISTA: EQUIPOS -->
+        <div id="viewTeams" class="hidden">
+            <div class="data-panel" aria-labelledby="teamsTitle">
+                <div>
+                    <p class="eyebrow">Grupos de operación</p>
+                    <h3 id="teamsTitle">Equipos</h3>
+                </div>
+                <div id="myTeam" class="my-team-panel">
+                    <p class="muted">Cargando tu equipo...</p>
+                </div>
+                <div id="teamsList" class="teams-list">
+                    <p class="muted">Cargando equipos...</p>
                 </div>
             </div>
         </div>

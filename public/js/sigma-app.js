@@ -28,10 +28,14 @@ const tabShop      = document.getElementById("tabShop");
 const tabRanking   = document.getElementById("tabRanking");
 const tabMissions  = document.getElementById("tabMissions");
 const tabAssistant = document.getElementById("tabAssistant");
+const tabTeams     = document.getElementById("tabTeams");
 const viewShop     = document.getElementById("viewShop");
 const viewRanking  = document.getElementById("viewRanking");
 const viewMissions = document.getElementById("viewMissions");
 const viewAssistant = document.getElementById("viewAssistant");
+const viewTeams    = document.getElementById("viewTeams");
+const myTeam       = document.getElementById("myTeam");
+const teamsList    = document.getElementById("teamsList");
 const assistantForm = document.getElementById("assistantForm");
 const assistantQuestion = document.getElementById("assistantQuestion");
 const assistantSubmit = document.getElementById("assistantSubmit");
@@ -66,8 +70,8 @@ const PRODUCT_IMAGES_BY_ID = {
 // ─── Pestañas ─────────────────────────────────────────────────────────────────
 
 function setTab(tab) {
-    const views = { shop: viewShop, ranking: viewRanking, missions: viewMissions, assistant: viewAssistant };
-    const btns  = { shop: tabShop,  ranking: tabRanking,  missions: tabMissions, assistant: tabAssistant };
+    const views = { shop: viewShop, ranking: viewRanking, missions: viewMissions, assistant: viewAssistant, teams: viewTeams };
+    const btns  = { shop: tabShop,  ranking: tabRanking,  missions: tabMissions, assistant: tabAssistant, teams: tabTeams };
 
     Object.entries(views).forEach(([key, el]) => {
         if (!el) return;
@@ -90,6 +94,10 @@ tabMissions?.addEventListener("click", async () => {
     if (!missionList.length) await loadMissions();
 });
 tabAssistant?.addEventListener("click", () => setTab("assistant"));
+tabTeams?.addEventListener("click", async () => {
+    setTab("teams");
+    await loadTeams();
+});
 
 // ─── Utilidades ───────────────────────────────────────────────────────────────
 
@@ -742,6 +750,105 @@ async function renderSession() {
     await loadRanking();
     await loadMissions();
 }
+
+// ─── Equipos ──────────────────────────────────────────────────────────────────
+
+async function loadTeams() {
+    if (!currentUser) return;
+    await Promise.all([loadMyTeam(), loadTeamsList()]);
+}
+
+async function loadMyTeam() {
+    if (!myTeam) return;
+    try {
+        const response = await fetch(`/dsaApp/user/${encodeURIComponent(currentUser.id)}/team`);
+        if (response.status === 404) {
+            myTeam.innerHTML = '<p class="muted">Aún no perteneces a ningún equipo.</p>';
+            return;
+        }
+        if (!response.ok) throw new Error(String(response.status));
+        const data = await response.json();
+        renderMyTeam(data);
+    } catch {
+        myTeam.innerHTML = '<p class="muted">No se ha podido cargar tu equipo.</p>';
+    }
+}
+
+function renderMyTeam(data) {
+    if (!myTeam) return;
+    const members = data.members || [];
+    myTeam.innerHTML = `
+        <div class="my-team-header">
+            <span class="eyebrow">Tu equipo</span>
+            <strong>${escapeHtml(data.team || "Equipo")}</strong>
+        </div>
+        <div class="team-members">
+            ${members.map(m => `
+                <span class="team-member-chip">
+                    <img src="${avatarPath(m.avatar)}" alt="${escapeHtml(m.name)}">
+                    <span>${escapeHtml(m.name)}</span>
+                    <small>${escapeHtml(m.points)} ECTS</small>
+                </span>
+            `).join("")}
+        </div>
+    `;
+}
+
+async function loadTeamsList() {
+    if (!teamsList) return;
+    try {
+        const response = await fetch(`/dsaApp/auth/grupos`);
+        if (!response.ok) throw new Error(String(response.status));
+        const equipos = await response.json();
+        renderTeamsList(equipos);
+    } catch {
+        teamsList.innerHTML = '<p class="muted">No se han podido cargar los equipos.</p>';
+    }
+}
+
+function renderTeamsList(equipos) {
+    if (!teamsList) return;
+    if (!equipos.length) {
+        teamsList.innerHTML = '<p class="muted">No hay equipos configurados todavía.</p>';
+        return;
+    }
+    teamsList.innerHTML = `
+        <p class="eyebrow" style="margin-top:1.2rem">Todos los equipos</p>
+        ${equipos.map(eq => `
+            <article class="team-card">
+                <div class="team-card-info">
+                    <strong>${escapeHtml(eq.nombre)}</strong>
+                    <p>${escapeHtml(eq.descripcion || "")}</p>
+                </div>
+                <button type="button" class="secondary" data-join-group="${escapeHtml(eq.id)}">Unirse</button>
+            </article>
+        `).join("")}
+    `;
+}
+
+teamsList?.addEventListener("click", async event => {
+    const btn = event.target.closest("button[data-join-group]");
+    if (!btn || !currentUser) return;
+    const groupId = btn.dataset.joinGroup;
+    btn.disabled = true;
+    try {
+        const response = await fetch(`/dsaApp/auth/grupos/${encodeURIComponent(groupId)}/join/${encodeURIComponent(currentUser.id)}`, {
+            method: "POST"
+        });
+        if (response.status === 409) {
+            setMessage("Ya perteneces a ese equipo.", "error");
+        } else if (!response.ok) {
+            setMessage("No se ha podido unirse al equipo.", "error");
+        } else {
+            setMessage("Te has unido al equipo.", "ok");
+            await loadTeams();
+        }
+    } catch {
+        setMessage("Error al unirse al equipo.", "error");
+    } finally {
+        btn.disabled = false;
+    }
+});
 
 // ─── Formularios ──────────────────────────────────────────────────────────────
 

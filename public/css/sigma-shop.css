@@ -612,3 +612,86 @@ button:disabled {
         align-self: flex-start;
     }
 }
+
+/* ─── Equipos ─────────────────────────────────────────────────────────────── */
+
+.my-team-panel {
+    background: rgba(69, 230, 255, 0.04);
+    border: 1px solid rgba(69, 230, 255, 0.18);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+}
+
+.my-team-header {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 12px;
+}
+
+.my-team-header strong {
+    font-size: 1.1rem;
+    color: var(--accent, #45e6ff);
+}
+
+.team-members {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.team-member-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(69, 230, 255, 0.08);
+    border: 1px solid rgba(69, 230, 255, 0.2);
+    border-radius: 8px;
+    padding: 6px 12px;
+}
+
+.team-member-chip img {
+    width: 32px;
+    height: 42px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.team-member-chip small {
+    color: rgba(200, 240, 255, 0.55);
+    font-size: 0.78rem;
+}
+
+.teams-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.team-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(69, 230, 255, 0.12);
+    border-radius: 10px;
+    padding: 14px 18px;
+}
+
+.team-card-info {
+    min-width: 0;
+}
+
+.team-card-info strong {
+    display: block;
+    font-size: 1rem;
+    color: var(--text, #c8f0ff);
+}
+
+.team-card-info p {
+    margin: 2px 0 0;
+    font-size: 0.85rem;
+    color: rgba(200, 240, 255, 0.55);
+}
