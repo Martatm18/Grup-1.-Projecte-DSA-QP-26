@@ -2,7 +2,6 @@ package edu.upc.dsa;
 
 import edu.upc.dsa.services.AssistentServicio;
 import edu.upc.dsa.services.AuthServicio;
-import edu.upc.dsa.services.DialogueServicio;
 import edu.upc.dsa.services.GameServicio;
 import edu.upc.dsa.services.ProductoServicio;
 import edu.upc.dsa.services.UserServicio;
@@ -41,7 +40,6 @@ public class Main {
         final ResourceConfig rc = new ResourceConfig();
         rc.register(AssistentServicio.class);
         rc.register(AuthServicio.class);
-        rc.register(DialogueServicio.class);
         rc.register(GameServicio.class);
         rc.register(ProductoServicio.class);
         rc.register(UserServicio.class);
