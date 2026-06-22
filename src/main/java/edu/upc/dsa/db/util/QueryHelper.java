@@ -230,7 +230,7 @@ public class QueryHelper {
         return "SELECT COUNT(*) AS total, SUM(CASE WHEN uo.completed=1 THEN 1 ELSE 0 END) AS done " +
                 "FROM objectives o " +
                 "LEFT JOIN user_objectives uo ON uo.objective_id=o.id AND uo.username=? " +
-                "WHERE o.mission_id=?";
+                "WHERE o.mission_id=? AND o.type != 'IR_ZONA'";
     }
 
     public static String createSelectNextMission() {
