@@ -836,15 +836,15 @@ teamsList?.addEventListener("click", async event => {
             method: "POST"
         });
         if (response.status === 409) {
-            setTeamMsg("Ya perteneces a ese equipo.", "error");
+            setMessage("Ya perteneces a ese equipo.", "error");
         } else if (!response.ok) {
-            setTeamMsg("No se ha podido unirse al equipo.", "error");
+            setMessage("No se ha podido unirse al equipo.", "error");
         } else {
-            setTeamMsg("Te has unido al equipo.", "ok");
+            setMessage("Te has unido al equipo.", "ok");
             await loadTeams();
         }
     } catch {
-        setTeamMsg("Error al unirse al equipo.", "error");
+        setMessage("Error al unirse al equipo.", "error");
     } finally {
         btn.disabled = false;
     }

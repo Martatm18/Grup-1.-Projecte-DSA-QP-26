@@ -8,6 +8,9 @@ import edu.upc.dsa.models.CanCompleteObjective;
 import edu.upc.dsa.models.ObjectiveResult;
 import edu.upc.dsa.models.Producto;
 import edu.upc.dsa.models.Puzzle;
+import edu.upc.dsa.models.ToniPregunta;
+import edu.upc.dsa.models.ToniRespuestaResult;
+import edu.upc.dsa.models.UseItemResult;
 import edu.upc.dsa.models.UserGameState;
 import io.swagger.annotations.Api;
 import org.apache.log4j.Logger;
@@ -16,9 +19,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Api(value = "/game", description = "Progreso de misiones y puzzles")
 @Path("/game")
@@ -180,25 +181,24 @@ public class GameServicio {
             }
             session.removeProductFromInventory(username, target.getId());
 
-            Map<String, Object> result = new HashMap<>();
-            result.put("used", slug);
+            UseItemResult result = new UseItemResult();
+            result.setUsed(slug);
             if ("botiquin".equals(slug)) {
                 session.updateHealth(username, 30);
-                result.put("effect", "health+30");
+                result.setEffect("health+30");
             } else if ("carga_emp".equals(slug)) {
-                result.put("effect", "emp_activated"); // Unity gestiona el efecto visual
+                result.setEffect("emp_activated");
             } else {
-                result.put("effect", "consumed");
+                result.setEffect("consumed");
             }
             UserGameState state = session.getEstadoJugador(username);
-            result.put("health", state != null ? state.getHealth() : null);
+            result.setHealth(state != null ? state.getHealth() : null);
 
-            // Auto-completar objetivo OBTENER_OBJETO si referencia este slug
             try {
                 ObjectiveResult progress = dao.autoCompletarUso(username, slug);
                 if (progress != null) {
-                    result.put("objectiveCompleted", true);
-                    result.put("objectiveProgress", progress);
+                    result.setObjectiveCompleted(true);
+                    result.setObjectiveProgress(progress);
                 }
             } catch (Exception e) {
                 logger.warn("No se pudo auto-completar objetivo de uso para " + username + "/" + slug, e);
@@ -231,11 +231,7 @@ public class GameServicio {
                         .entity(new ApiError("NOT_FOUND", "No hay preguntas disponibles.")).build();
             }
             Puzzle p = puzzles.get(new java.util.Random().nextInt(puzzles.size()));
-            Map<String, Object> result = new HashMap<>();
-            result.put("id", p.getId());
-            result.put("titulo", p.getTitle());
-            result.put("pregunta", p.getDescription());
-            return Response.ok(result).build();
+            return Response.ok(new ToniPregunta(p.getId(), p.getTitle(), p.getDescription())).build();
         } catch (Exception e) {
             logger.error("Error get pregunta Toni", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
@@ -271,11 +267,7 @@ public class GameServicio {
                 session.darEcts(username, 2);
             }
             edu.upc.dsa.models.User user = session.get(edu.upc.dsa.models.User.class, username);
-            Map<String, Object> result = new HashMap<>();
-            result.put("correcto", correcto);
-            result.put("ects_ganados", correcto ? 2 : 0);
-            result.put("ects_total", user != null ? user.getEcts() : 0);
-            return Response.ok(result).build();
+            return Response.ok(new ToniRespuestaResult(correcto, correcto ? 2 : 0, user != null ? user.getEcts() : 0)).build();
         } catch (Exception e) {
             logger.error("Error responder Toni puzzle " + puzzleId, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
