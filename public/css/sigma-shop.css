@@ -695,3 +695,38 @@ button:disabled {
     font-size: 0.85rem;
     color: rgba(200, 240, 255, 0.55);
 }
+
+.create-team-form {
+    background: rgba(69, 230, 255, 0.04);
+    border: 1px solid rgba(69, 230, 255, 0.14);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+}
+
+.create-team-fields {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.create-team-fields input {
+    flex: 1 1 140px;
+    padding: 8px 12px;
+    background: rgba(3, 9, 16, 0.7);
+    border: 1px solid rgba(69, 230, 255, 0.25);
+    border-radius: 6px;
+    color: var(--text, #c8f0ff);
+    font-size: 0.9rem;
+}
+
+.create-team-fields input::placeholder {
+    color: rgba(200, 240, 255, 0.35);
+}
+
+.create-team-fields button {
+    flex: 0 0 auto;
+    padding: 8px 18px;
+    font-size: 0.9rem;
+}

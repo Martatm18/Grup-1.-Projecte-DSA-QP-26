@@ -76,6 +76,37 @@ public class EquipoDAO {
         }
     }
 
+    public int crearEquipo(String id, String nombre, String descripcion, String creatorUser) {
+        if (id == null || id.trim().isEmpty() || nombre == null || nombre.trim().isEmpty()) {
+            return 400;
+        }
+
+        if (getEquipo(id.trim()) != null) {
+            return 409;
+        }
+
+        try (Connection conn = DBUtils.getConnection();
+             PreparedStatement pstm = conn.prepareStatement(QueryHelper.createInsertEquipo())) {
+
+            pstm.setString(1, id.trim());
+            pstm.setString(2, nombre.trim());
+            pstm.setString(3, descripcion != null ? descripcion.trim() : "");
+            pstm.executeUpdate();
+
+        } catch (SQLException e) {
+            if (e.getMessage() != null && e.getMessage().contains("Duplicate")) {
+                return 409;
+            }
+            throw new RuntimeException(e);
+        }
+
+        if (creatorUser != null && !creatorUser.trim().isEmpty()) {
+            unirseAGrupo(id.trim(), creatorUser.trim());
+        }
+
+        return 201;
+    }
+
     public int unirseAGrupo(String idGrupo, String idUser) {
         if (idGrupo == null || idGrupo.trim().isEmpty() || idUser == null || idUser.trim().isEmpty()) {
             return 400;

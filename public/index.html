@@ -213,6 +213,16 @@
                 <div id="myTeam" class="my-team-panel">
                     <p class="muted">Cargando tu equipo...</p>
                 </div>
+                <form id="createTeamForm" class="create-team-form">
+                    <p class="eyebrow" style="margin-bottom:8px">Crear equipo nuevo</p>
+                    <div class="create-team-fields">
+                        <input id="newTeamId" type="text" placeholder="ID del equipo (sin espacios)" required>
+                        <input id="newTeamName" type="text" placeholder="Nombre del equipo" required>
+                        <input id="newTeamDesc" type="text" placeholder="Descripción (opcional)">
+                        <button type="submit">Crear</button>
+                    </div>
+                    <p id="createTeamMsg" class="message" aria-live="polite"></p>
+                </form>
                 <div id="teamsList" class="teams-list">
                     <p class="muted">Cargando equipos...</p>
                 </div>
@@ -240,6 +250,6 @@
     </section>
 </main>
 
-<script src="js/sigma-app.js?v=7"></script>
+<script src="js/sigma-app.js?v=8"></script>
 </body>
 </html>

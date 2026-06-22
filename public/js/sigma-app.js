@@ -836,17 +836,64 @@ teamsList?.addEventListener("click", async event => {
             method: "POST"
         });
         if (response.status === 409) {
-            setMessage("Ya perteneces a ese equipo.", "error");
+            setTeamMsg("Ya perteneces a ese equipo.", "error");
         } else if (!response.ok) {
-            setMessage("No se ha podido unirse al equipo.", "error");
+            setTeamMsg("No se ha podido unirse al equipo.", "error");
         } else {
-            setMessage("Te has unido al equipo.", "ok");
+            setTeamMsg("Te has unido al equipo.", "ok");
             await loadTeams();
         }
     } catch {
-        setMessage("Error al unirse al equipo.", "error");
+        setTeamMsg("Error al unirse al equipo.", "error");
     } finally {
         btn.disabled = false;
+    }
+});
+
+const createTeamForm = document.getElementById("createTeamForm");
+const createTeamMsg  = document.getElementById("createTeamMsg");
+
+function setTeamMsg(text, type) {
+    if (!createTeamMsg) return;
+    createTeamMsg.textContent = text;
+    createTeamMsg.className = type ? `message ${type}` : "message";
+}
+
+createTeamForm?.addEventListener("submit", async event => {
+    event.preventDefault();
+    if (!currentUser) return;
+    const id   = document.getElementById("newTeamId").value.trim();
+    const name = document.getElementById("newTeamName").value.trim();
+    const desc = document.getElementById("newTeamDesc").value.trim();
+
+    if (!id || !name) { setTeamMsg("Rellena id y nombre.", "error"); return; }
+    if (/\s/.test(id)) { setTeamMsg("El ID no puede tener espacios.", "error"); return; }
+
+    const submitBtn = createTeamForm.querySelector("button[type=submit]");
+    submitBtn.disabled = true;
+    setTeamMsg("Creando equipo...", "");
+
+    try {
+        const response = await fetch(`/dsaApp/auth/grupos?userId=${encodeURIComponent(currentUser.id)}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id, nombre: name, descripcion: desc })
+        });
+        if (response.status === 409) {
+            setTeamMsg("Ya existe un equipo con ese ID.", "error");
+        } else if (response.status === 400) {
+            setTeamMsg("Rellena id y nombre del equipo.", "error");
+        } else if (!response.ok) {
+            setTeamMsg("No se ha podido crear el equipo.", "error");
+        } else {
+            setTeamMsg("Equipo creado.", "ok");
+            createTeamForm.reset();
+            await loadTeams();
+        }
+    } catch {
+        setTeamMsg("Error al crear el equipo.", "error");
+    } finally {
+        submitBtn.disabled = false;
     }
 });
 

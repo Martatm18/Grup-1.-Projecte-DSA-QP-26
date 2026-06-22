@@ -177,6 +177,32 @@ public class AuthServicio
     }
 
     @POST
+    @Path("/grupos")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response crearGrupo(Equipo equipo, @QueryParam("userId") String userId)
+    {
+        try {
+            if (equipo == null || isBlank(equipo.getId()) || isBlank(equipo.getNombre())) {
+                return badRequest("MISSING_PARAMS", "Faltan id y nombre del equipo.");
+            }
+            int status = equipoDAO.crearEquipo(equipo.getId(), equipo.getNombre(), equipo.getDescripcion(), userId);
+            switch (status) {
+                case 201: {
+                    Equipo created = equipoDAO.getEquipo(equipo.getId().trim());
+                    return Response.status(Response.Status.CREATED).entity(created).build();
+                }
+                case 400: return badRequest("MISSING_PARAMS", "Faltan id y nombre del equipo.");
+                case 409: return error(Response.Status.CONFLICT, "ALREADY_EXISTS", "Ya existe un equipo con ese id.");
+                default:  return serverError();
+            }
+        } catch (Exception e) {
+            logger.error("Crear grupo error", e);
+            return serverError();
+        }
+    }
+
+    @POST
     @Path("/grupos/{groupId}/join/{userId}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response joinGrupo(@PathParam("groupId") String groupId, @PathParam("userId") String userId)
